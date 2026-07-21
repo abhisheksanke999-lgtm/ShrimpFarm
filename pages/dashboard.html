@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Shrimp Farm Management System</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/modules.css">
+</head>
+<body>
+
+<div class="app-wrapper">
+
+  <!-- Left Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-logo">
+        <i class="fa-solid fa-shrimp"></i>
+      </div>
+      <span class="brand-text">AquaControl</span>
+    </div>
+
+    <div class="sidebar-nav">
+      <div class="nav-section-title">MAIN MENU</div>
+      <a href="dashboard.html" class="nav-item active">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="pond.html" class="nav-item">
+        <i class="fa-solid fa-water"></i>
+        <span>Pond Preparation</span>
+      </a>
+      <a href="stocking.html" class="nav-item">
+        <i class="fa-solid fa-boxes-packing"></i>
+        <span>Seed Stocking</span>
+      </a>
+      <a href="daily.html" class="nav-item">
+        <i class="fa-solid fa-clipboard-list"></i>
+        <span>Daily Observation</span>
+      </a>
+      <a href="feed.html" class="nav-item">
+        <i class="fa-solid fa-wheat-awn"></i>
+        <span>Feed Management</span>
+      </a>
+      <a href="water.html" class="nav-item">
+        <i class="fa-solid fa-vial-circle-check"></i>
+        <span>Water Quality</span>
+        <span class="badge bg-danger rounded-pill">1 Warning</span>
+      </a>
+
+      <div class="nav-section-title mt-3">OPERATIONS</div>
+      <a href="medicine.html" class="nav-item">
+        <i class="fa-solid fa-capsules"></i>
+        <span>Medicine Records</span>
+      </a>
+      <a href="growth.html" class="nav-item">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>Growth Monitoring</span>
+      </a>
+      <a href="expense.html" class="nav-item">
+        <i class="fa-solid fa-file-invoice-dollar"></i>
+        <span>Expense Records</span>
+      </a>
+      <a href="harvest.html" class="nav-item">
+        <i class="fa-solid fa-truck-ramp-box"></i>
+        <span>Harvest Records</span>
+      </a>
+      <a href="profit.html" class="nav-item">
+        <i class="fa-solid fa-calculator"></i>
+        <span>Profit Calculator</span>
+      </a>
+
+      <div class="nav-section-title mt-3">SYSTEM</div>
+      <a href="reports.html" class="nav-item">
+        <i class="fa-solid fa-file-pdf"></i>
+        <span>Reports</span>
+      </a>
+      <a href="settings.html" class="nav-item">
+        <i class="fa-solid fa-gear"></i>
+        <span>Settings</span>
+      </a>
+      <a href="login.html" class="nav-item text-danger">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content Wrapper -->
+  <div class="main-content">
+    
+    <!-- Top Navbar -->
+    <header class="top-navbar">
+      <div class="navbar-left">
+        <button class="sidebar-toggle-btn" id="sidebarToggle">
+          <i class="fa-solid fa-bars-staggered"></i>
+        </button>
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" placeholder="Search ponds, feeds, logs...">
+        </div>
+      </div>
+
+      <div class="navbar-right">
+        <!-- Dark Mode Toggle -->
+        <button class="nav-icon-btn theme-toggle-btn" title="Toggle Theme">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+
+        <!-- Notifications Bell -->
+        <div class="position-relative">
+          <button class="nav-icon-btn" id="notifBtn">
+            <i class="fa-regular fa-bell"></i>
+            <span class="badge-dot"></span>
+          </button>
+          
+          <div class="notifications-dropdown" id="notifDropdown">
+            <div class="notif-header">
+              <h6 class="mb-0 fw-bold">Notifications (3)</h6>
+              <a href="#" class="small text-primary">Mark all read</a>
+            </div>
+            <div class="notif-item">
+              <div class="notif-icon warning"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <div>
+                <div class="fw-semibold small">Low Feed Stock</div>
+                <div class="text-muted small">GroBest Pellet No.2 is under 850kg.</div>
+                <span class="text-light small">10 mins ago</span>
+              </div>
+            </div>
+            <div class="notif-item">
+              <div class="notif-icon danger"><i class="fa-solid fa-skull"></i></div>
+              <div>
+                <div class="fw-semibold small">High Ammonia Level</div>
+                <div class="text-muted small">Pond 03 Ammonia at 0.45 ppm.</div>
+                <span class="text-light small">1 hour ago</span>
+              </div>
+            </div>
+            <div class="notif-item">
+              <div class="notif-icon info"><i class="fa-solid fa-calendar-check"></i></div>
+              <div>
+                <div class="fw-semibold small">Treatment Reminder</div>
+                <div class="text-muted small">Pond 01 Probiotics scheduled in 4 days.</div>
+                <span class="text-light small">3 hours ago</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Profile Dropdown -->
+        <div class="user-profile-menu">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="avatar-img">
+          <div class="d-none d-md-block">
+            <div class="fw-semibold small mb-0">John Sterling</div>
+            <div class="text-muted small" style="font-size: 0.75rem;">Farm Director</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Body Container -->
+    <main class="page-container bg-wave-pattern">
+      
+      <!-- Dashboard Title Banner -->
+      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+          <h3 class="fw-bold mb-1">Farm Executive Overview</h3>
+          <p class="text-muted mb-0 small">Real-time telemetry and aquaculture performance monitoring.</p>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="daily.html" class="btn btn-outline-saas"><i class="fa-solid fa-plus me-1"></i>New Observation</a>
+          <a href="profit.html" class="btn btn-primary-saas"><i class="fa-solid fa-calculator me-1"></i>Profit Calculator</a>
+        </div>
+      </div>
+
+      <!-- Weather & Water Telemetry Banner Widget -->
+      <div class="card-saas mb-4 bg-primary text-white" style="background: linear-gradient(135deg, #0B4F6C 0%, #16698e 100%);">
+        <div class="row align-items-center">
+          <div class="col-md-7">
+            <div class="d-flex align-items-center gap-3">
+              <div class="fs-1"><i class="fa-solid fa-cloud-sun"></i></div>
+              <div>
+                <h5 class="text-white mb-0">Sunny Coastal Weather - 31°C</h5>
+                <p class="mb-0 text-white-50 small">Tidal Status: High Tide @ 14:30 | Wind: 12 km/h SE | Humidity: 68%</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-5 text-md-end mt-3 mt-md-0">
+            <span class="badge bg-white text-primary px-3 py-2 fs-6 rounded-pill me-2"><i class="fa-solid fa-temperature-three-quarters me-1"></i> Water Temp: 29.5°C</span>
+            <span class="badge bg-success px-3 py-2 fs-6 rounded-pill"><i class="fa-solid fa-vial me-1"></i> DO: 6.4 mg/L</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8 Key SaaS Metric Cards Grid -->
+      <div class="row g-3 mb-4">
+        <!-- 1. Total Ponds -->
+        <div class="col-xl-3 col-md-6">
+          <div class="card-saas">
+            <div class="metric-card">
+              <div class="metric-info">
+                <h6>Total Ponds</h6>
+                <div class="metric-value">6 Ponds</div>
+                <div class="metric-trend up"><i class="fa-solid fa-arrow-up"></i> 5 Active (83%)</div>
+              </div>
+              <div class="metric-icon-box icon-blue">
+                <i class="fa-solid fa-water"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Active Cycles -->
+        <div class="col-xl-3 col-md-6">
+          <div class="card-saas">
+            <div class="metric-card">
+              <div class="metric-info">
+                <h6>Active Cycles</h6>
+                <div class="metric-value">3 Cycles</div>
+                <div class="metric-trend up"><i class="fa-solid fa-clock"></i> DOC 45 Avg</div>
+              </div>
+              <div class="metric-icon-box icon-green">
+                <i class="fa-solid fa-arrows-spin"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Total Shrimp Count -->
+        <div class="col-xl-3 col-md-6">
+          <div class="card-saas">
+            <div class="metric-card">
+              <div class="metric-info">
+                <h6>Total Shrimp Biomass</h6>
+                <div class="metric-value">630,000 PL</div>
+                <div class="metric-trend up"><i class="fa-solid fa-heart-pulse"></i> 88% Survival</div>
+              </div>
+              <div class="metric-icon-box icon-orange">
+                <i class="fa-solid fa-shrimp"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Avg Growth (ABW) -->
+        <div class="col-xl-3 col-md-6">
+          <div class="card-saas">
+            <div class="metric-card">
+              <div class="metric-info">
+                <h6>Average Growth (ABW)</h6>
+                <div class="metric-value">14.5 g</div>
+                <div class="metric-trend up"><i class="fa-solid fa-chart-line"></i> +0.32 g/day</div>
+              </div>
+              <div class="metric-icon-box icon-cyan">
+                <i class="fa-solid fa-weight-scale"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Feed Used -->
+        <div class="col-xl-3 col-md-6">
+          <div class="card-saas">
+            <div class="metric-card">
+              <div class="metric-info">
+                <h6>Total Feed Used</h6>
+                <div class="metric-value">530 kg</div>
+                <div class="metric-trend up"><i class="fa-solid fa-bowl-food"></i> FCR: 1.22</div>
+              </div>
+              <div class="metric-icon-box icon-green">
+                <i class="fa-solid fa-wheat-awn"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Expenses -->
+        <div class="col-xl-3 col-md-6">
+          <div class="card-saas">
+            <div class="metric-card">
+              <div class="metric-info">
+                <h6>Monthly Expenses</h6>
+                <div class="metric-value">$7,080</div>
+                <div class="metric-trend down"><i class="fa-solid fa-arrow-down"></i> -4.2% Budget</div>
+              </div>
+              <div class="metric-icon-box icon-danger">
+                <i class="fa-solid fa-receipt"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. Expected Harvest -->
+        <div class="col-xl-3 col-md-6">
+          <div class="card-saas">
+            <div class="metric-card">
+              <div class="metric-info">
+                <h6>Expected Harvest</h6>
+                <div class="metric-value">12.8 Tons</div>
+                <div class="metric-trend up"><i class="fa-regular fa-calendar-check"></i> Sep 10, 2026</div>
+              </div>
+              <div class="metric-icon-box icon-blue">
+                <i class="fa-solid fa-scale-balanced"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. Current Profit -->
+        <div class="col-xl-3 col-md-6">
+          <div class="card-saas">
+            <div class="metric-card">
+              <div class="metric-info">
+                <h6>Projected Profit</h6>
+                <div class="metric-value text-success">$18,900</div>
+                <div class="metric-trend up"><i class="fa-solid fa-arrow-trend-up"></i> ROI: 54.2%</div>
+              </div>
+              <div class="metric-icon-box icon-orange">
+                <i class="fa-solid fa-sack-dollar"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Section Row 1 -->
+      <div class="row g-4 mb-4">
+        <!-- Monthly Expenses Bar Chart -->
+        <div class="col-lg-8">
+          <div class="card-saas h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="mb-0 fw-bold">Monthly Expense Breakdown</h5>
+              <select class="form-select form-select-sm w-auto">
+                <option>2026 Season</option>
+                <option>2025 Season</option>
+              </select>
+            </div>
+            <div style="height: 300px;">
+              <canvas id="expenseChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Expense Pie Chart -->
+        <div class="col-lg-4">
+          <div class="card-saas h-100">
+            <h5 class="mb-3 fw-bold">Cost Distribution</h5>
+            <div style="height: 280px;">
+              <canvas id="expensePieChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Section Row 2 -->
+      <div class="row g-4 mb-4">
+        <!-- Feed Consumption Trend -->
+        <div class="col-lg-6">
+          <div class="card-saas">
+            <h5 class="mb-3 fw-bold">Feed Consumption Trend (kg/week)</h5>
+            <div style="height: 260px;">
+              <canvas id="feedConsumptionChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Growth Rate vs Target -->
+        <div class="col-lg-6">
+          <div class="card-saas">
+            <h5 class="mb-3 fw-bold">Shrimp Weight Growth (ABW in Grams)</h5>
+            <div style="height: 260px;">
+              <canvas id="growthChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Grid: Recent Activity & Upcoming Tasks -->
+      <div class="row g-4">
+        <div class="col-lg-7">
+          <div class="card-saas">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="mb-0 fw-bold">Recent Farm Logs</h5>
+              <a href="daily.html" class="small fw-semibold text-primary">View All Logs</a>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-custom">
+                <thead>
+                  <tr>
+                    <th>Pond</th>
+                    <th>Date</th>
+                    <th>Temp / pH</th>
+                    <th>DO Level</th>
+                    <th>Mortality</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="fw-semibold">Pond Alpha (01)</span></td>
+                    <td>Today, 07:30</td>
+                    <td>29.5°C / 7.9</td>
+                    <td><span class="text-success fw-semibold">6.4 mg/L</span></td>
+                    <td>0</td>
+                    <td><span class="badge-custom badge-success">Optimal</span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="fw-semibold">Pond Beta (02)</span></td>
+                    <td>Today, 07:15</td>
+                    <td>28.8°C / 8.1</td>
+                    <td><span class="text-success fw-semibold">5.8 mg/L</span></td>
+                    <td>2</td>
+                    <td><span class="badge-custom badge-success">Optimal</span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="fw-semibold">Pond Gamma (03)</span></td>
+                    <td>Yesterday</td>
+                    <td>30.1°C / 8.4</td>
+                    <td><span class="text-warning fw-semibold">5.2 mg/L</span></td>
+                    <td>5</td>
+                    <td><span class="badge-custom badge-warning">Warning</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <div class="card-saas h-100">
+            <h5 class="mb-3 fw-bold">Upcoming Operations</h5>
+            <div class="timeline-list">
+              <div class="timeline-item">
+                <div class="timeline-marker"><i class="fa-solid fa-vial"></i></div>
+                <div class="timeline-content">
+                  <div class="fw-semibold small">Water Quality Sampling</div>
+                  <div class="text-muted small">Pond Alpha & Beta full parameter analysis</div>
+                  <span class="badge bg-light text-dark mt-1">Today, 16:00</span>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker bg-success"><i class="fa-solid fa-capsules"></i></div>
+                <div class="timeline-content">
+                  <div class="fw-semibold small">Probiotics Application</div>
+                  <div class="text-muted small">Pond 01 Soil & Water probiotic dosing (500g)</div>
+                  <span class="badge bg-light text-dark mt-1">Tomorrow, 08:00</span>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker bg-warning"><i class="fa-solid fa-truck-fast"></i></div>
+                <div class="timeline-content">
+                  <div class="fw-semibold small">Feed Delivery Expected</div>
+                  <div class="text-muted small">CP Nova Pellet Feed 2 Tons shipment</div>
+                  <span class="badge bg-light text-dark mt-1">Jul 24, 2026</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- JavaScript Dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/dummy-data.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/charts-config.js"></script>
+<script src="../assets/js/modules.js"></script>
+</body>
+</html>

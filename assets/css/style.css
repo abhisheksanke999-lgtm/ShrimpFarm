@@ -1,0 +1,190 @@
+/* ==========================================================================
+   Shrimp Farm Record Management System - Core Design System & Theme Styles
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap');
+
+:root {
+  /* Brand Theme Colors */
+  --primary: #0B4F6C;
+  --primary-rgb: 11, 79, 108;
+  --primary-light: #16698e;
+  --primary-dark: #073549;
+
+  --secondary: #2E8B57;
+  --secondary-rgb: 46, 139, 87;
+  --secondary-light: #3db874;
+
+  --accent: #FF8C42;
+  --accent-rgb: 255, 140, 66;
+  --accent-hover: #e5762d;
+
+  --info: #00A8E8;
+  --warning: #FFC107;
+  --danger: #E63946;
+  --success: #2A9D8F;
+
+  /* Surfaces & Backgrounds */
+  --bg-main: #F5F7FA;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #FFFFFF;
+  --border-color: #E2E8F0;
+  --border-color-light: #F1F5F9;
+
+  /* Typography */
+  --text-main: #2C3E50;
+  --text-muted: #64748B;
+  --text-light: #94A3B8;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(11, 79, 108, 0.04);
+  --shadow-md: 0 6px 16px rgba(11, 79, 108, 0.08);
+  --shadow-lg: 0 12px 32px rgba(11, 79, 108, 0.12);
+  --shadow-glow: 0 0 20px rgba(11, 79, 108, 0.2);
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-backdrop: blur(12px);
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 9999px;
+
+  /* Transitions */
+  --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Sidebar */
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 78px;
+  --navbar-height: 70px;
+}
+
+/* Dark Theme Overrides */
+[data-theme="dark"] {
+  --bg-main: #0B132B;
+  --bg-surface: #1C2541;
+  --bg-surface-elevated: #263359;
+  --border-color: #2D3A60;
+  --border-color-light: #202D52;
+
+  --text-main: #F1F5F9;
+  --text-muted: #94A3B8;
+  --text-light: #64748B;
+
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.4);
+
+  --glass-bg: rgba(28, 37, 65, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.08);
+}
+
+/* Reset & Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  line-height: 1.6;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Outfit', 'Poppins', sans-serif;
+  font-weight: 600;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+a {
+  text-decoration: none;
+  color: var(--primary);
+  transition: var(--transition-fast);
+}
+
+a:hover {
+  color: var(--accent);
+}
+
+/* Aqua Background Patterns */
+.bg-wave-pattern {
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-wave-pattern::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(11, 79, 108, 0.08) 0%, rgba(46, 139, 87, 0) 70%);
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Glassmorphism Card Utility */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-backdrop);
+  -webkit-backdrop-filter: var(--glass-backdrop);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-md);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(11, 79, 108, 0.2);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Utility Animations */
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 10px rgba(11, 79, 108, 0.2); }
+  50% { box-shadow: 0 0 25px rgba(255, 140, 66, 0.4); }
+}

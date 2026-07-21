@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Shrimp Farm Management System</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/modules.css">
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-card animate-slide-up" style="max-width: 500px;">
+      <div class="auth-brand">
+        <div class="auth-brand-logo">
+          <i class="fa-solid fa-water"></i>
+        </div>
+        <h3 class="fw-bold text-primary mb-1">Create Farmer Account</h3>
+        <p class="text-muted small">Start managing your shrimp ponds digitally</p>
+      </div>
+
+      <form action="otp-verification.html" method="GET">
+        <div class="form-floating-custom mb-3">
+          <input type="text" id="regName" placeholder=" " required>
+          <label for="regName"><i class="fa-regular fa-user me-2"></i>Full Name</label>
+        </div>
+
+        <div class="form-floating-custom mb-3">
+          <input type="email" id="regEmail" placeholder=" " required>
+          <label for="regEmail"><i class="fa-regular fa-envelope me-2"></i>Email Address</label>
+        </div>
+
+        <div class="form-floating-custom mb-3">
+          <input type="text" id="regFarm" placeholder=" " required value="Oceanic Aqua Farms">
+          <label for="regFarm"><i class="fa-solid fa-wheat-awn me-2"></i>Farm Name</label>
+        </div>
+
+        <div class="form-floating-custom mb-3">
+          <input type="password" id="regPass" placeholder=" " required>
+          <label for="regPass"><i class="fa-solid fa-lock me-2"></i>Password</label>
+        </div>
+
+        <div class="form-check mb-4">
+          <input class="form-check-input" type="checkbox" id="termsCheck" required checked>
+          <label class="form-check-label small text-muted" for="termsCheck">
+            I agree to the <a href="#" class="text-primary">Terms of Service</a> & <a href="#" class="text-primary">Privacy Policy</a>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary-saas w-100 py-2.5 mb-3">
+          <i class="fa-solid fa-user-plus me-2"></i>Register Farm Account
+        </button>
+      </form>
+
+      <div class="text-center small text-muted">
+        Already registered? <a href="login.html" class="fw-semibold text-primary">Sign In</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

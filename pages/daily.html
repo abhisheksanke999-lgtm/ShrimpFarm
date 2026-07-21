@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Observations - Shrimp Farm Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/modules.css">
+</head>
+<body>
+
+<div class="app-wrapper">
+  <!-- Left Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-logo"><i class="fa-solid fa-shrimp"></i></div>
+      <span class="brand-text">AquaControl</span>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-title">MAIN MENU</div>
+      <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a>
+      <a href="pond.html" class="nav-item"><i class="fa-solid fa-water"></i><span>Pond Preparation</span></a>
+      <a href="stocking.html" class="nav-item"><i class="fa-solid fa-boxes-packing"></i><span>Seed Stocking</span></a>
+      <a href="daily.html" class="nav-item active"><i class="fa-solid fa-clipboard-list"></i><span>Daily Observation</span></a>
+      <a href="feed.html" class="nav-item"><i class="fa-solid fa-wheat-awn"></i><span>Feed Management</span></a>
+      <a href="water.html" class="nav-item"><i class="fa-solid fa-vial-circle-check"></i><span>Water Quality</span></a>
+      <div class="nav-section-title mt-3">OPERATIONS</div>
+      <a href="medicine.html" class="nav-item"><i class="fa-solid fa-capsules"></i><span>Medicine Records</span></a>
+      <a href="growth.html" class="nav-item"><i class="fa-solid fa-chart-line"></i><span>Growth Monitoring</span></a>
+      <a href="expense.html" class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i><span>Expense Records</span></a>
+      <a href="harvest.html" class="nav-item"><i class="fa-solid fa-truck-ramp-box"></i><span>Harvest Records</span></a>
+      <a href="profit.html" class="nav-item"><i class="fa-solid fa-calculator"></i><span>Profit Calculator</span></a>
+      <div class="nav-section-title mt-3">SYSTEM</div>
+      <a href="reports.html" class="nav-item"><i class="fa-solid fa-file-pdf"></i><span>Reports</span></a>
+      <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
+      <a href="login.html" class="nav-item text-danger"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <header class="top-navbar">
+      <div class="navbar-left">
+        <button class="sidebar-toggle-btn"><i class="fa-solid fa-bars-staggered"></i></button>
+        <h5 class="mb-0 fw-bold">Module 3: Daily Observations & Water Telemetry</h5>
+      </div>
+      <div class="navbar-right">
+        <button class="nav-icon-btn theme-toggle-btn"><i class="fa-solid fa-moon"></i></button>
+        <div class="user-profile-menu">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="avatar-img">
+        </div>
+      </div>
+    </header>
+
+    <main class="page-container">
+      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+          <h4 class="fw-bold mb-0">Daily Pond Inspection Logs</h4>
+          <p class="text-muted small mb-0">Record physical observations, water parameters, and mortality logs</p>
+        </div>
+        <button class="btn btn-primary-saas" onclick="openModal('addDailyLogModal')">
+          <i class="fa-solid fa-plus me-1"></i> New Inspection Entry
+        </button>
+      </div>
+
+      <div class="row g-4">
+        <!-- Log History Table -->
+        <div class="col-lg-8">
+          <div class="card-saas">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0">Observation History</h5>
+              <input type="text" class="table-search-input form-control form-control-sm w-auto" data-table-target="dailyTable" placeholder="Search logs...">
+            </div>
+            <div class="table-responsive">
+              <table class="table table-custom" id="dailyTable">
+                <thead>
+                  <tr>
+                    <th>Log ID</th>
+                    <th>Date & Pond</th>
+                    <th>Temp / pH</th>
+                    <th>DO / Salinity</th>
+                    <th>Activity</th>
+                    <th>Mortality</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="fw-bold text-primary">LOG-501</span></td>
+                    <td>2026-07-21<br><span class="badge bg-light text-dark">Pond Alpha</span></td>
+                    <td>29.5°C / 7.9</td>
+                    <td>6.4 mg/L / 22 ppt</td>
+                    <td><span class="badge-custom badge-success">Active Feeding</span></td>
+                    <td>0 count</td>
+                    <td><button class="btn btn-sm btn-outline-saas" onclick="openModal('addDailyLogModal')"><i class="fa-solid fa-eye"></i></button></td>
+                  </tr>
+                  <tr>
+                    <td><span class="fw-bold text-primary">LOG-502</span></td>
+                    <td>2026-07-21<br><span class="badge bg-light text-dark">Pond Beta</span></td>
+                    <td>28.8°C / 8.1</td>
+                    <td>5.8 mg/L / 24 ppt</td>
+                    <td><span class="badge-custom badge-success">Normal</span></td>
+                    <td>2 count</td>
+                    <td><button class="btn btn-sm btn-outline-saas" onclick="openModal('addDailyLogModal')"><i class="fa-solid fa-eye"></i></button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline / Inspection Stream -->
+        <div class="col-lg-4">
+          <div class="card-saas">
+            <h5 class="fw-bold mb-3">Inspection Timeline Stream</h5>
+            <div class="timeline-list">
+              <div class="timeline-item">
+                <div class="timeline-marker"><i class="fa-solid fa-temperature-three-quarters"></i></div>
+                <div class="timeline-content">
+                  <div class="fw-semibold small">Morning Reading - Pond 01</div>
+                  <div class="text-muted small">DO: 6.4 mg/L | Temp: 29.5°C | Checktray clean</div>
+                  <span class="badge bg-light text-dark mt-1">Today, 07:30 AM</span>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-marker bg-warning"><i class="fa-solid fa-vial"></i></div>
+                <div class="timeline-content">
+                  <div class="fw-semibold small">Midday pH & Salinity Check</div>
+                  <div class="text-muted small">Pond 03 pH slightly high (8.4). Water color dark green.</div>
+                  <span class="badge bg-light text-dark mt-1">Yesterday, 12:15 PM</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-custom-overlay" id="addDailyLogModal">
+  <div class="modal-custom-card" style="max-width: 700px;">
+    <div class="modal-custom-header">
+      <h5 class="mb-0 fw-bold"><i class="fa-solid fa-clipboard-list text-primary me-2"></i>New Daily Pond Observation Log</h5>
+      <button class="btn-close" onclick="closeModal('addDailyLogModal')"></button>
+    </div>
+    <div class="modal-custom-body">
+      <form onsubmit="event.preventDefault(); closeModal('addDailyLogModal'); showToast('Daily log saved!', 'success');">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">Pond</label>
+            <select class="form-select" required>
+              <option>POND-01 (Pond Alpha)</option>
+              <option>POND-02 (Pond Beta)</option>
+              <option>POND-03 (Pond Gamma)</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">Observation Date</label>
+            <input type="date" class="form-control" value="2026-07-21" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">Water Temp (°C)</label>
+            <input type="number" step="0.1" class="form-control" value="29.5">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">pH Level</label>
+            <input type="number" step="0.1" class="form-control" value="7.9">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">Dissolved Oxygen (mg/L)</label>
+            <input type="number" step="0.1" class="form-control" value="6.4">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">Salinity (ppt)</label>
+            <input type="number" class="form-control" value="22">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">Water Color</label>
+            <select class="form-select">
+              <option>Light Green</option>
+              <option>Brownish Green</option>
+              <option>Dark Green</option>
+              <option>Clear / Turbid</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">Shrimp Activity</label>
+            <select class="form-select">
+              <option>Active Feeding</option>
+              <option>Normal</option>
+              <option>Sluggish / Surface Swimming</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">Mortality Count</label>
+            <input type="number" class="form-control" value="0">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">Disease Symptoms</label>
+            <input type="text" class="form-control" placeholder="None / Soft shell / Black gill">
+          </div>
+          <div class="col-12">
+            <label class="form-label small fw-semibold">Notes & Observations</label>
+            <textarea class="form-control" rows="2" placeholder="Checktray status, water clarity, feed response..."></textarea>
+          </div>
+        </div>
+        <div class="modal-custom-footer mt-4">
+          <button type="button" class="btn btn-outline-saas" onclick="closeModal('addDailyLogModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary-saas">Submit Observation Log</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/dummy-data.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/modules.js"></script>
+</body>
+</html>
