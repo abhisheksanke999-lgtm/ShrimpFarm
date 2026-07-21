@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seed Stocking - Shrimp Farm Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/modules.css">
+</head>
+<body>
+
+<div class="app-wrapper">
+  <!-- Left Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-logo"><i class="fa-solid fa-shrimp"></i></div>
+      <span class="brand-text">AquaControl</span>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-title">MAIN MENU</div>
+      <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a>
+      <a href="pond.html" class="nav-item"><i class="fa-solid fa-water"></i><span>Pond Preparation</span></a>
+      <a href="stocking.html" class="nav-item active"><i class="fa-solid fa-boxes-packing"></i><span>Seed Stocking</span></a>
+      <a href="daily.html" class="nav-item"><i class="fa-solid fa-clipboard-list"></i><span>Daily Observation</span></a>
+      <a href="feed.html" class="nav-item"><i class="fa-solid fa-wheat-awn"></i><span>Feed Management</span></a>
+      <a href="water.html" class="nav-item"><i class="fa-solid fa-vial-circle-check"></i><span>Water Quality</span></a>
+      <div class="nav-section-title mt-3">OPERATIONS</div>
+      <a href="medicine.html" class="nav-item"><i class="fa-solid fa-capsules"></i><span>Medicine Records</span></a>
+      <a href="growth.html" class="nav-item"><i class="fa-solid fa-chart-line"></i><span>Growth Monitoring</span></a>
+      <a href="expense.html" class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i><span>Expense Records</span></a>
+      <a href="harvest.html" class="nav-item"><i class="fa-solid fa-truck-ramp-box"></i><span>Harvest Records</span></a>
+      <a href="profit.html" class="nav-item"><i class="fa-solid fa-calculator"></i><span>Profit Calculator</span></a>
+      <div class="nav-section-title mt-3">SYSTEM</div>
+      <a href="reports.html" class="nav-item"><i class="fa-solid fa-file-pdf"></i><span>Reports</span></a>
+      <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
+      <a href="login.html" class="nav-item text-danger"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <header class="top-navbar">
+      <div class="navbar-left">
+        <button class="sidebar-toggle-btn"><i class="fa-solid fa-bars-staggered"></i></button>
+        <h5 class="mb-0 fw-bold">Module 2: Seed Stocking Records</h5>
+      </div>
+      <div class="navbar-right">
+        <button class="nav-icon-btn theme-toggle-btn"><i class="fa-solid fa-moon"></i></button>
+        <div class="user-profile-menu">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="avatar-img">
+        </div>
+      </div>
+    </header>
+
+    <main class="page-container">
+      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" class="table-search-input" data-table-target="stockingTable" placeholder="Search stocking records...">
+        </div>
+        <button class="btn btn-primary-saas" onclick="openModal('addStockingModal')">
+          <i class="fa-solid fa-plus me-1"></i> Add Stocking Batch
+        </button>
+      </div>
+
+      <div class="table-responsive mb-4">
+        <table class="table table-custom" id="stockingTable">
+          <thead>
+            <tr>
+              <th>Stock ID</th>
+              <th>Pond</th>
+              <th>Stocking Date</th>
+              <th>Supplier</th>
+              <th>Species & PL</th>
+              <th>Quantity (PL)</th>
+              <th>Survival Est.</th>
+              <th>Cost ($)</th>
+              <th>Quality Grade</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="fw-bold text-primary">STK-101</span></td>
+              <td>Pond Alpha (01)</td>
+              <td>2026-06-05</td>
+              <td>CP Aquaculture Hatchery</td>
+              <td>L. vannamei (PL-12)</td>
+              <td>250,000 PL</td>
+              <td><span class="badge bg-success">88% Survival</span></td>
+              <td>$3,500.00</td>
+              <td><span class="badge-custom badge-success">A+ PCR Negative</span></td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-saas me-1" onclick="openModal('addStockingModal')"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn btn-sm btn-outline-danger" onclick="showToast('Record deleted', 'danger')"><i class="fa-solid fa-trash"></i></button>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="fw-bold text-primary">STK-102</span></td>
+              <td>Pond Beta (02)</td>
+              <td>2026-06-10</td>
+              <td>Sheng Long Hatchery</td>
+              <td>L. vannamei (PL-15)</td>
+              <td>200,000 PL</td>
+              <td><span class="badge bg-success">92% Survival</span></td>
+              <td>$2,900.00</td>
+              <td><span class="badge-custom badge-success">A+ Grade</span></td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-saas me-1" onclick="openModal('addStockingModal')"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn btn-sm btn-outline-danger" onclick="showToast('Record deleted', 'danger')"><i class="fa-solid fa-trash"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <nav class="d-flex justify-content-between align-items-center">
+        <span class="small text-muted">Showing 1 to 2 of 2 entries</span>
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+          <li class="page-item active"><a class="page-link" href="#">1</a></li>
+          <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
+        </ul>
+      </nav>
+    </main>
+  </div>
+</div>
+
+<!-- Add Stocking Modal -->
+<div class="modal-custom-overlay" id="addStockingModal">
+  <div class="modal-custom-card">
+    <div class="modal-custom-header">
+      <h5 class="mb-0 fw-bold"><i class="fa-solid fa-boxes-packing text-primary me-2"></i>New Seed Stocking Entry</h5>
+      <button class="btn-close" onclick="closeModal('addStockingModal')"></button>
+    </div>
+    <div class="modal-custom-body">
+      <form onsubmit="event.preventDefault(); closeModal('addStockingModal'); showToast('Stocking record saved!', 'success');">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">Pond Number</label>
+            <select class="form-select" required>
+              <option>POND-01 (Pond Alpha)</option>
+              <option>POND-02 (Pond Beta)</option>
+              <option>POND-03 (Pond Gamma)</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">Stocking Date</label>
+            <input type="date" class="form-control" value="2026-07-21" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">Hatchery Supplier</label>
+            <input type="text" class="form-control" placeholder="CP Hatchery / Sheng Long" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">Species</label>
+            <input type="text" class="form-control" value="Litopenaeus vannamei">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">PL Stage / Size</label>
+            <input type="text" class="form-control" placeholder="e.g. PL-12" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">Seed Quantity (PL Count)</label>
+            <input type="number" class="form-control" value="250000" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">Survival Rate Est (%)</label>
+            <input type="number" step="0.1" class="form-control" value="88">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">Total Cost ($)</label>
+            <input type="number" step="0.01" class="form-control" value="3500.00">
+          </div>
+          <div class="col-12">
+            <label class="form-label small fw-semibold">Invoice / PCR Health Certificate Upload</label>
+            <input type="file" class="form-control">
+          </div>
+        </div>
+        <div class="modal-custom-footer mt-4">
+          <button type="button" class="btn btn-outline-saas" onclick="closeModal('addStockingModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary-saas">Save Stocking Batch</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/dummy-data.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/modules.js"></script>
+</body>
+</html>

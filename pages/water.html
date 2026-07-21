@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Water Quality - Shrimp Farm Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/modules.css">
+</head>
+<body>
+
+<div class="app-wrapper">
+  <!-- Left Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-logo"><i class="fa-solid fa-shrimp"></i></div>
+      <span class="brand-text">AquaControl</span>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-title">MAIN MENU</div>
+      <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a>
+      <a href="pond.html" class="nav-item"><i class="fa-solid fa-water"></i><span>Pond Preparation</span></a>
+      <a href="stocking.html" class="nav-item"><i class="fa-solid fa-boxes-packing"></i><span>Seed Stocking</span></a>
+      <a href="daily.html" class="nav-item"><i class="fa-solid fa-clipboard-list"></i><span>Daily Observation</span></a>
+      <a href="feed.html" class="nav-item"><i class="fa-solid fa-wheat-awn"></i><span>Feed Management</span></a>
+      <a href="water.html" class="nav-item active"><i class="fa-solid fa-vial-circle-check"></i><span>Water Quality</span></a>
+      <div class="nav-section-title mt-3">OPERATIONS</div>
+      <a href="medicine.html" class="nav-item"><i class="fa-solid fa-capsules"></i><span>Medicine Records</span></a>
+      <a href="growth.html" class="nav-item"><i class="fa-solid fa-chart-line"></i><span>Growth Monitoring</span></a>
+      <a href="expense.html" class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i><span>Expense Records</span></a>
+      <a href="harvest.html" class="nav-item"><i class="fa-solid fa-truck-ramp-box"></i><span>Harvest Records</span></a>
+      <a href="profit.html" class="nav-item"><i class="fa-solid fa-calculator"></i><span>Profit Calculator</span></a>
+      <div class="nav-section-title mt-3">SYSTEM</div>
+      <a href="reports.html" class="nav-item"><i class="fa-solid fa-file-pdf"></i><span>Reports</span></a>
+      <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
+      <a href="login.html" class="nav-item text-danger"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <header class="top-navbar">
+      <div class="navbar-left">
+        <button class="sidebar-toggle-btn"><i class="fa-solid fa-bars-staggered"></i></button>
+        <h5 class="mb-0 fw-bold">Module 5: Water Quality & Chemical Parameters</h5>
+      </div>
+      <div class="navbar-right">
+        <button class="nav-icon-btn theme-toggle-btn"><i class="fa-solid fa-moon"></i></button>
+        <div class="user-profile-menu">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="avatar-img">
+        </div>
+      </div>
+    </header>
+
+    <main class="page-container">
+      
+      <!-- Top Pond Selector -->
+      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <label class="fw-semibold">Select Target Pond:</label>
+          <select class="form-select w-auto fw-bold text-primary">
+            <option>Pond Alpha (01)</option>
+            <option>Pond Beta (02)</option>
+            <option selected>Pond Gamma (03) - Warning</option>
+          </select>
+        </div>
+        <button class="btn btn-primary-saas" onclick="showToast('Lab parameter entry saved!', 'success')">
+          <i class="fa-solid fa-flask me-1"></i> Log Lab Water Sample
+        </button>
+      </div>
+
+      <!-- Parameter Cards Grid -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-3">
+          <div class="param-card optimal">
+            <div class="param-title">Water Temp</div>
+            <div class="param-value text-success">29.5°C</div>
+            <div class="param-range">Optimal Range: 28°C - 32°C</div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="param-card optimal">
+            <div class="param-title">pH Level</div>
+            <div class="param-value text-success">7.9</div>
+            <div class="param-range">Optimal Range: 7.5 - 8.3</div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="param-card warning">
+            <div class="param-title">Dissolved Oxygen (DO)</div>
+            <div class="param-value text-warning">5.2 mg/L</div>
+            <div class="param-range">Optimal Range: > 5.5 mg/L</div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="param-card danger">
+            <div class="param-title">Toxic Ammonia (NH3)</div>
+            <div class="param-value text-danger">0.45 ppm</div>
+            <div class="param-range">Optimal Range: < 0.1 ppm</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Smart Recommendation Box -->
+      <div class="card-saas mb-4 border-warning" style="background: rgba(255, 193, 7, 0.05);">
+        <div class="d-flex align-items-start gap-3">
+          <div class="text-warning fs-2"><i class="fa-solid fa-lightbulb"></i></div>
+          <div>
+            <h6 class="fw-bold mb-1">Water Advisory & Action Recommendations (Pond Gamma 03)</h6>
+            <p class="small text-muted mb-2">Ammonia levels are elevated (0.45 ppm) and DO is approaching warning threshold.</p>
+            <ul class="small mb-0 ps-3">
+              <li><strong>Immediate Action:</strong> Turn on paddlewheel aerators 3 & 4 continuously for the next 8 hours.</li>
+              <li><strong>Bioremediation:</strong> Apply Nitrosomonas/Nitrobacter bacterial probiotic complex at 500g/Ha dose.</li>
+              <li><strong>Feeding:</strong> Reduce daily feed ration by 20% until Ammonia drops below 0.15 ppm.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Parameter Trend History Chart -->
+      <div class="card-saas">
+        <h5 class="fw-bold mb-3">7-Day Parameter Trend Graph</h5>
+        <div style="height: 300px;">
+          <canvas id="waterTrendChart"></canvas>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/dummy-data.js"></script>
+<script src="../assets/js/main.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const ctx = document.getElementById('waterTrendChart');
+    if (ctx) {
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Jul 15', 'Jul 16', 'Jul 17', 'Jul 18', 'Jul 19', 'Jul 20', 'Jul 21'],
+          datasets: [{
+            label: 'pH Level',
+            data: [7.8, 7.9, 8.0, 8.1, 8.2, 8.3, 8.4],
+            borderColor: '#0B4F6C',
+            tension: 0.3
+          }, {
+            label: 'DO (mg/L)',
+            data: [6.8, 6.5, 6.2, 6.0, 5.8, 5.5, 5.2],
+            borderColor: '#2E8B57',
+            tension: 0.3
+          }, {
+            label: 'Ammonia (ppm x10)',
+            data: [0.2, 0.4, 0.8, 1.5, 2.5, 3.8, 4.5],
+            borderColor: '#E63946',
+            borderDash: [5, 5],
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+    }
+  });
+</script>
+</body>
+</html>
