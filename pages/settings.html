@@ -3,120 +3,59 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Settings - Shrimp Farm Management</title>
+  <title>Settings - AquaControl</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="../assets/css/style.css">
-  <link rel="stylesheet" href="../assets/css/components.css">
-  <link rel="stylesheet" href="../assets/css/modules.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
 </head>
-<body>
+<body class="bg-main">
+  <div id="app"></div>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+  <script>
+    async function loadPage(flash) {
+      const user = await requireAuth();
+      if (!user) return;
 
-<div class="app-wrapper">
-  <!-- Left Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="brand-logo"><i class="fa-solid fa-shrimp"></i></div>
-      <span class="brand-text">AquaControl</span>
-    </div>
-    <div class="sidebar-nav">
-      <div class="nav-section-title">MAIN MENU</div>
-      <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a>
-      <a href="pond.html" class="nav-item"><i class="fa-solid fa-water"></i><span>Pond Preparation</span></a>
-      <a href="stocking.html" class="nav-item"><i class="fa-solid fa-boxes-packing"></i><span>Seed Stocking</span></a>
-      <a href="daily.html" class="nav-item"><i class="fa-solid fa-clipboard-list"></i><span>Daily Observation</span></a>
-      <a href="feed.html" class="nav-item"><i class="fa-solid fa-wheat-awn"></i><span>Feed Management</span></a>
-      <a href="water.html" class="nav-item"><i class="fa-solid fa-vial-circle-check"></i><span>Water Quality</span></a>
-      <div class="nav-section-title mt-3">OPERATIONS</div>
-      <a href="medicine.html" class="nav-item"><i class="fa-solid fa-capsules"></i><span>Medicine Records</span></a>
-      <a href="growth.html" class="nav-item"><i class="fa-solid fa-chart-line"></i><span>Growth Monitoring</span></a>
-      <a href="expense.html" class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i><span>Expense Records</span></a>
-      <a href="harvest.html" class="nav-item"><i class="fa-solid fa-truck-ramp-box"></i><span>Harvest Records</span></a>
-      <a href="profit.html" class="nav-item"><i class="fa-solid fa-calculator"></i><span>Profit Calculator</span></a>
-      <div class="nav-section-title mt-3">SYSTEM</div>
-      <a href="reports.html" class="nav-item"><i class="fa-solid fa-file-pdf"></i><span>Reports</span></a>
-      <a href="settings.html" class="nav-item active"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
-      <a href="login.html" class="nav-item text-danger"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
-    </div>
-  </aside>
-
-  <div class="main-content">
-    <header class="top-navbar">
-      <div class="navbar-left">
-        <button class="sidebar-toggle-btn"><i class="fa-solid fa-bars-staggered"></i></button>
-        <h5 class="mb-0 fw-bold">Farm & System Settings</h5>
-      </div>
-      <div class="navbar-right">
-        <button class="nav-icon-btn theme-toggle-btn"><i class="fa-solid fa-moon"></i></button>
-        <div class="user-profile-menu">
-          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="avatar-img">
+      mountAppShell("settings", `
+        <div class="mb-4 pb-2 border-bottom">
+          <h4 class="fw-bold mb-1">Settings</h4>
+          <p class="text-muted small mb-0">Update your profile display name</p>
         </div>
-      </div>
-    </header>
-
-    <main class="page-container">
-      <div class="row g-4">
-        
-        <!-- Farm Profile Settings -->
-        <div class="col-lg-6">
-          <div class="card-saas">
-            <h5 class="fw-bold mb-3"><i class="fa-solid fa-wheat-awn text-primary me-2"></i>Farm Details</h5>
-            <form onsubmit="event.preventDefault(); showToast('Farm settings saved!', 'success');">
-              <div class="mb-3">
-                <label class="form-label small fw-semibold">Farm Name</label>
-                <input type="text" class="form-control" value="Oceanic Aqua Farms Ltd.">
-              </div>
-              <div class="mb-3">
-                <label class="form-label small fw-semibold">Owner / Director Name</label>
-                <input type="text" class="form-control" value="John Sterling">
-              </div>
-              <div class="mb-3">
-                <label class="form-label small fw-semibold">Location / Address</label>
-                <input type="text" class="form-control" value="Coastal Zone Sector 4, Bay Area">
-              </div>
-              <div class="mb-3">
-                <label class="form-label small fw-semibold">Primary Water Source</label>
-                <input type="text" class="form-control" value="Deep Sea Filtered Intake & Borewell">
-              </div>
-              <button type="submit" class="btn btn-primary-saas">Save Farm Details</button>
-            </form>
+        <div class="${flash ? "" : "d-none"} alert alert-${flash?.type || "success"} py-2 small rounded-3 mb-3">${flash ? escapeHtml(flash.msg) : ""}</div>
+        <div class="row">
+          <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3 bg-white p-3">
+              <h6 class="fw-bold text-primary mb-3">Profile</h6>
+              <form id="settingsForm">
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Full Name</label>
+                  <input type="text" name="full_name" class="form-control" value="${escapeHtml(user.full_name)}" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Email</label>
+                  <input type="email" class="form-control bg-light" value="${escapeHtml(user.email)}" readonly>
+                </div>
+                <button type="submit" class="btn btn-primary rounded-3">Save Changes</button>
+              </form>
+            </div>
           </div>
         </div>
+      `);
 
-        <!-- Security & System Backup -->
-        <div class="col-lg-6">
-          <div class="card-saas mb-4">
-            <h5 class="fw-bold mb-3"><i class="fa-solid fa-shield-halved text-secondary me-2"></i>Security & Passwords</h5>
-            <form onsubmit="event.preventDefault(); showToast('Password updated!', 'success');">
-              <div class="mb-3">
-                <label class="form-label small fw-semibold">Current Password</label>
-                <input type="password" class="form-control" value="password123">
-              </div>
-              <div class="mb-3">
-                <label class="form-label small fw-semibold">New Password</label>
-                <input type="password" class="form-control" placeholder="Enter new password">
-              </div>
-              <button type="submit" class="btn btn-outline-saas">Update Security Credentials</button>
-            </form>
-          </div>
-
-          <!-- XAMPP Database Backup Box -->
-          <div class="card-saas">
-            <h5 class="fw-bold mb-2"><i class="fa-solid fa-database text-warning me-2"></i>MySQL Database Backup</h5>
-            <p class="text-muted small mb-3">Download full SQL backup dump for XAMPP phpMyAdmin import.</p>
-            <a href="../database/shrimp_farm_db.sql" download class="btn btn-accent-saas">
-              <i class="fa-solid fa-download me-1"></i> Download shrimp_farm_db.sql Backup
-            </a>
-          </div>
-        </div>
-
-      </div>
-    </main>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../assets/js/dummy-data.js"></script>
-<script src="../assets/js/main.js"></script>
+      document.getElementById("settingsForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        try {
+          const res = await API.put("/api/settings/profile", { full_name: fd.get("full_name") });
+          await loadPage({ type: "success", msg: res.message });
+        } catch (err) {
+          await loadPage({ type: "danger", msg: err.message });
+        }
+      });
+    }
+    loadPage();
+  </script>
 </body>
 </html>

@@ -3,253 +3,116 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Feed Management - Shrimp Farm Management</title>
+  <title>Feed Records - AquaControl</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="../assets/css/style.css">
-  <link rel="stylesheet" href="../assets/css/components.css">
-  <link rel="stylesheet" href="../assets/css/modules.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
 </head>
-<body>
+<body class="bg-main">
+  <div id="app"></div>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+  <script>
+    async function loadPage(flash) {
+      const user = await requireAuth();
+      if (!user) return;
+      const [ponds, records] = await Promise.all([API.get("/api/ponds/names"), API.get("/api/feed")]);
+      const pondOptions = ponds.length
+        ? ponds.map((p) => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)}</option>`).join("")
+        : `<option value="">No ponds yet</option>`;
+      const rows = records.length
+        ? records.map((r) => `
+            <tr>
+              <td class="fw-bold text-primary">${escapeHtml(r.pond_name)}</td>
+              <td>${escapeHtml(r.entry_date)}</td>
+              <td>${escapeHtml(r.feed_brand)}</td>
+              <td>${escapeHtml(r.quantity_kg)} kg</td>
+              <td>${escapeHtml(r.feed_size || "-")}</td>
+              <td>${escapeHtml(r.feeding_time || "-")}</td>
+            </tr>`).join("")
+        : `<tr><td colspan="6" class="text-center text-muted py-3">No feed records yet.</td></tr>`;
 
-<div class="app-wrapper">
-  <!-- Left Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="brand-logo"><i class="fa-solid fa-shrimp"></i></div>
-      <span class="brand-text">AquaControl</span>
-    </div>
-    <div class="sidebar-nav">
-      <div class="nav-section-title">MAIN MENU</div>
-      <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a>
-      <a href="pond.html" class="nav-item"><i class="fa-solid fa-water"></i><span>Pond Preparation</span></a>
-      <a href="stocking.html" class="nav-item"><i class="fa-solid fa-boxes-packing"></i><span>Seed Stocking</span></a>
-      <a href="daily.html" class="nav-item"><i class="fa-solid fa-clipboard-list"></i><span>Daily Observation</span></a>
-      <a href="feed.html" class="nav-item active"><i class="fa-solid fa-wheat-awn"></i><span>Feed Management</span></a>
-      <a href="water.html" class="nav-item"><i class="fa-solid fa-vial-circle-check"></i><span>Water Quality</span></a>
-      <div class="nav-section-title mt-3">OPERATIONS</div>
-      <a href="medicine.html" class="nav-item"><i class="fa-solid fa-capsules"></i><span>Medicine Records</span></a>
-      <a href="growth.html" class="nav-item"><i class="fa-solid fa-chart-line"></i><span>Growth Monitoring</span></a>
-      <a href="expense.html" class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i><span>Expense Records</span></a>
-      <a href="harvest.html" class="nav-item"><i class="fa-solid fa-truck-ramp-box"></i><span>Harvest Records</span></a>
-      <a href="profit.html" class="nav-item"><i class="fa-solid fa-calculator"></i><span>Profit Calculator</span></a>
-      <div class="nav-section-title mt-3">SYSTEM</div>
-      <a href="reports.html" class="nav-item"><i class="fa-solid fa-file-pdf"></i><span>Reports</span></a>
-      <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
-      <a href="login.html" class="nav-item text-danger"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
-    </div>
-  </aside>
-
-  <!-- Main Content -->
-  <div class="main-content">
-    <header class="top-navbar">
-      <div class="navbar-left">
-        <button class="sidebar-toggle-btn"><i class="fa-solid fa-bars-staggered"></i></button>
-        <h5 class="mb-0 fw-bold">Module 4: Feed Management & Auto-Calculator</h5>
-      </div>
-      <div class="navbar-right">
-        <button class="nav-icon-btn theme-toggle-btn"><i class="fa-solid fa-moon"></i></button>
-        <div class="user-profile-menu">
-          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="avatar-img">
+      mountAppShell("feed", `
+        <div class="mb-4 pb-2 border-bottom">
+          <h4 class="fw-bold mb-1">Feed Records</h4>
+          <p class="text-muted small mb-0">Log how much feed was given to each pond</p>
         </div>
-      </div>
-    </header>
-
-    <main class="page-container">
-      
-      <!-- Top Alert Banner -->
-      <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center gap-3 mb-4 glass-card" role="alert">
-        <i class="fa-solid fa-triangle-exclamation fs-4 text-warning"></i>
-        <div>
-          <strong>Low Stock Warning:</strong> GroBest Pellet No.2 stock is currently <strong>850 kg</strong> (below 1,000 kg threshold). Consider placing an order.
-        </div>
-        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
-      </div>
-
-      <div class="row g-4 mb-4">
-        <!-- Interactive Feed Requirement Calculator -->
-        <div class="col-lg-6">
-          <div class="card-saas h-100">
-            <h5 class="fw-bold mb-1"><i class="fa-solid fa-calculator text-primary me-2"></i>Automatic Feed Requirement Calculator</h5>
-            <p class="text-muted small mb-3">Computes recommended daily ration based on biomass and ABW</p>
-
-            <form id="feedCalcForm">
-              <div class="row g-3 mb-3">
-                <div class="col-md-6">
-                  <label class="form-label small fw-semibold">Average Body Weight (ABW in grams)</label>
-                  <input type="number" step="0.1" id="calcAbw" class="form-control" value="14.5" placeholder="e.g. 14.5">
+        <div class="${flash ? "" : "d-none"} alert alert-${flash?.type || "success"} py-2 small rounded-3 mb-3">${flash ? escapeHtml(flash.msg) : ""}</div>
+        <div class="row g-4">
+          <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 bg-white p-3">
+              <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-plus-circle me-1"></i> Add Feed Record</h6>
+              <form id="feedForm">
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Pond</label>
+                  <select name="pond_name" class="form-select" required>${pondOptions}</select>
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label small fw-semibold">Estimated Shrimp Population</label>
-                  <input type="number" id="calcShrimpCount" class="form-control" value="220000" placeholder="e.g. 220000">
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Date</label>
+                  <input type="date" name="entry_date" class="form-control" value="${todayISO()}" required>
                 </div>
-                <div class="col-md-12">
-                  <label class="form-label small fw-semibold">Feeding Rate (% Body Weight)</label>
-                  <select id="calcFeedRate" class="form-select">
-                    <option value="2.5">2.5% (Maintenance / Low Temp)</option>
-                    <option value="3.0" selected>3.0% (Normal Growth)</option>
-                    <option value="3.5">3.5% (High Growth Phase)</option>
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Feed Brand</label>
+                  <input type="text" name="feed_brand" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Quantity (kg)</label>
+                  <input type="number" step="0.1" name="quantity_kg" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Feed Size</label>
+                  <input type="text" name="feed_size" class="form-control">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Feeding Time</label>
+                  <select name="feeding_time" class="form-select">
+                    <option value="feed 1">feed 1</option>
+                    <option value="feed 2">feed 2</option>
+                    <option value="feed 3">feed 3</option>
+                    <option value="feed 4">feed 4</option>
+                    <option value="Morning">Morning</option>
                   </select>
                 </div>
-              </div>
-            </form>
-
-            <div id="calcDailyFeedResult">
-              <div class="p-3 glass-card rounded-md">
-                <div class="text-muted small">Estimated Total Biomass</div>
-                <div class="fs-4 fw-bold text-primary">3,190 kg</div>
-                <hr class="my-2">
-                <div class="d-flex justify-content-between align-items-center">
-                  <span>Recommended Daily Feed:</span>
-                  <span class="fs-4 fw-bold text-success">95.70 kg / day</span>
-                </div>
-                <div class="small text-muted mt-1">Split into 4 feedings: <strong>23.93 kg</strong> per meal.</div>
+                <button class="btn btn-primary w-100 rounded-3" type="submit">Save Feed</button>
+              </form>
+            </div>
+          </div>
+          <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3 bg-white p-3">
+              <h6 class="fw-bold text-primary mb-3">All Feed Records</h6>
+              <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                  <thead class="table-light">
+                    <tr><th>Pond</th><th>Date</th><th>Brand</th><th>Qty</th><th>Size</th><th>Time</th></tr>
+                  </thead>
+                  <tbody>${rows}</tbody>
+                </table>
               </div>
             </div>
           </div>
         </div>
+      `);
 
-        <!-- Current Feed Stock Inventory -->
-        <div class="col-lg-6">
-          <div class="card-saas h-100">
-            <h5 class="fw-bold mb-3"><i class="fa-solid fa-boxes-stacked text-secondary me-2"></i>Feed Inventory Levels</h5>
-            <div class="mb-3">
-              <div class="d-flex justify-content-between small fw-semibold mb-1">
-                <span>CP Nova Pellet No. 3 (1.8mm)</span>
-                <span class="text-success">1,420 kg (Good)</span>
-              </div>
-              <div class="progress" style="height: 10px;">
-                <div class="progress-bar bg-success" style="width: 71%;"></div>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <div class="d-flex justify-content-between small fw-semibold mb-1">
-                <span>GroBest Premium Pellet No. 2 (1.4mm)</span>
-                <span class="text-warning">850 kg (Low Stock)</span>
-              </div>
-              <div class="progress" style="height: 10px;">
-                <div class="progress-bar bg-warning" style="width: 42%;"></div>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <div class="d-flex justify-content-between small fw-semibold mb-1">
-                <span>Uni-President Pellet No. 4 (2.2mm)</span>
-                <span class="text-success">2,150 kg (Optimal)</span>
-              </div>
-              <div class="progress" style="height: 10px;">
-                <div class="progress-bar bg-primary" style="width: 86%;"></div>
-              </div>
-            </div>
-
-            <div class="mt-4 pt-2 border-top text-end">
-              <button class="btn btn-primary-saas" onclick="openModal('addFeedEntryModal')">
-                <i class="fa-solid fa-plus me-1"></i> Log Daily Feeding Entry
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Feed History Table -->
-      <div class="card-saas mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="fw-bold mb-0">Daily Feed Dispatch History</h5>
-          <input type="text" class="table-search-input form-control form-control-sm w-auto" data-table-target="feedTable" placeholder="Search feed logs...">
-        </div>
-        <div class="table-responsive">
-          <table class="table table-custom" id="feedTable">
-            <thead>
-              <tr>
-                <th>Feed ID</th>
-                <th>Pond</th>
-                <th>Brand & Size</th>
-                <th>Quantity Fed</th>
-                <th>Feeding Schedule</th>
-                <th>Stock Left</th>
-                <th class="text-end">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><span class="fw-bold text-primary">FD-901</span></td>
-                <td>Pond Alpha (01)</td>
-                <td>CP Nova (1.8 mm)</td>
-                <td>180 kg</td>
-                <td>06:00, 11:00, 16:00, 21:00</td>
-                <td>1,420 kg</td>
-                <td class="text-end">
-                  <button class="btn btn-sm btn-outline-saas"><i class="fa-solid fa-pen"></i></button>
-                </td>
-              </tr>
-              <tr>
-                <td><span class="fw-bold text-primary">FD-902</span></td>
-                <td>Pond Beta (02)</td>
-                <td>GroBest No. 2 (1.4 mm)</td>
-                <td>140 kg</td>
-                <td>06:30, 11:30, 16:30, 21:30</td>
-                <td>850 kg</td>
-                <td class="text-end">
-                  <button class="btn btn-sm btn-outline-saas"><i class="fa-solid fa-pen"></i></button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-    </main>
-  </div>
-</div>
-
-<!-- Add Feed Log Modal -->
-<div class="modal-custom-overlay" id="addFeedEntryModal">
-  <div class="modal-custom-card">
-    <div class="modal-custom-header">
-      <h5 class="mb-0 fw-bold"><i class="fa-solid fa-wheat-awn text-primary me-2"></i>Log Daily Feed Dispatch</h5>
-      <button class="btn-close" onclick="closeModal('addFeedEntryModal')"></button>
-    </div>
-    <div class="modal-custom-body">
-      <form onsubmit="event.preventDefault(); closeModal('addFeedEntryModal'); showToast('Feed record saved!', 'success');">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label small fw-semibold">Target Pond</label>
-            <select class="form-select" required>
-              <option>POND-01 (Pond Alpha)</option>
-              <option>POND-02 (Pond Beta)</option>
-              <option>POND-03 (Pond Gamma)</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label small fw-semibold">Feed Brand</label>
-            <input type="text" class="form-control" value="CP Nova Feed" required>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label small fw-semibold">Pellet Size</label>
-            <input type="text" class="form-control" value="1.8 mm (No. 3)" required>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label small fw-semibold">Quantity Fed (kg)</label>
-            <input type="number" class="form-control" value="180" required>
-          </div>
-          <div class="col-12">
-            <label class="form-label small fw-semibold">Feeding Times</label>
-            <input type="text" class="form-control" value="06:00, 11:00, 16:00, 21:00">
-          </div>
-        </div>
-        <div class="modal-custom-footer mt-4">
-          <button type="button" class="btn btn-outline-saas" onclick="closeModal('addFeedEntryModal')">Cancel</button>
-          <button type="submit" class="btn btn-primary-saas">Submit Feed Entry</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../assets/js/dummy-data.js"></script>
-<script src="../assets/js/main.js"></script>
-<script src="../assets/js/modules.js"></script>
+      document.getElementById("feedForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        try {
+          const res = await API.post("/api/feed", {
+            pond_name: fd.get("pond_name"),
+            feed_brand: fd.get("feed_brand"),
+            quantity_kg: Number(fd.get("quantity_kg")),
+            feeding_time: fd.get("feeding_time"),
+            entry_date: fd.get("entry_date"),
+            feed_size: fd.get("feed_size") || "",
+          });
+          await loadPage({ type: "success", msg: res.message });
+        } catch (err) {
+          await loadPage({ type: "danger", msg: err.message });
+        }
+      });
+    }
+    loadPage();
+  </script>
 </body>
 </html>

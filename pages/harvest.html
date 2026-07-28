@@ -3,114 +3,110 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Harvest Records - Shrimp Farm Management</title>
+  <title>Harvest Records - AquaControl</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="../assets/css/style.css">
-  <link rel="stylesheet" href="../assets/css/components.css">
-  <link rel="stylesheet" href="../assets/css/modules.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
 </head>
-<body>
+<body class="bg-main">
+  <div id="app"></div>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+  <script>
+    async function loadPage(flash) {
+      const user = await requireAuth();
+      if (!user) return;
+      const [ponds, data] = await Promise.all([API.get("/api/ponds/names"), API.get("/api/harvests")]);
+      const pondOptions = ponds.length
+        ? ponds.map((p) => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)}</option>`).join("")
+        : `<option value="">No ponds yet</option>`;
+      const rows = data.items.length
+        ? data.items.map((h) => `
+            <tr>
+              <td class="fw-bold text-primary">${escapeHtml(h.pond_name)}</td>
+              <td>${escapeHtml(h.harvest_date)}</td>
+              <td>${escapeHtml(h.quantity_kg)} kg</td>
+              <td>Rs.${Number(h.price_per_kg).toFixed(2)}</td>
+              <td>Rs.${Number(h.total_amount).toFixed(2)}</td>
+              <td>${escapeHtml(h.buyer_name || "-")}</td>
+            </tr>`).join("")
+        : `<tr><td colspan="6" class="text-center text-muted py-3">No harvest records yet.</td></tr>`;
 
-<div class="app-wrapper">
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="brand-logo"><i class="fa-solid fa-shrimp"></i></div>
-      <span class="brand-text">AquaControl</span>
-    </div>
-    <div class="sidebar-nav">
-      <div class="nav-section-title">MAIN MENU</div>
-      <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a>
-      <a href="pond.html" class="nav-item"><i class="fa-solid fa-water"></i><span>Pond Preparation</span></a>
-      <a href="stocking.html" class="nav-item"><i class="fa-solid fa-boxes-packing"></i><span>Seed Stocking</span></a>
-      <a href="daily.html" class="nav-item"><i class="fa-solid fa-clipboard-list"></i><span>Daily Observation</span></a>
-      <a href="feed.html" class="nav-item"><i class="fa-solid fa-wheat-awn"></i><span>Feed Management</span></a>
-      <a href="water.html" class="nav-item"><i class="fa-solid fa-vial-circle-check"></i><span>Water Quality</span></a>
-      <div class="nav-section-title mt-3">OPERATIONS</div>
-      <a href="medicine.html" class="nav-item"><i class="fa-solid fa-capsules"></i><span>Medicine Records</span></a>
-      <a href="growth.html" class="nav-item"><i class="fa-solid fa-chart-line"></i><span>Growth Monitoring</span></a>
-      <a href="expense.html" class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i><span>Expense Records</span></a>
-      <a href="harvest.html" class="nav-item active"><i class="fa-solid fa-truck-ramp-box"></i><span>Harvest Records</span></a>
-      <a href="profit.html" class="nav-item"><i class="fa-solid fa-calculator"></i><span>Profit Calculator</span></a>
-      <div class="nav-section-title mt-3">SYSTEM</div>
-      <a href="reports.html" class="nav-item"><i class="fa-solid fa-file-pdf"></i><span>Reports</span></a>
-      <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
-      <a href="login.html" class="nav-item text-danger"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
-    </div>
-  </aside>
-
-  <div class="main-content">
-    <header class="top-navbar">
-      <div class="navbar-left">
-        <button class="sidebar-toggle-btn"><i class="fa-solid fa-bars-staggered"></i></button>
-        <h5 class="mb-0 fw-bold">Module 9: Harvest & Sales Records</h5>
-      </div>
-      <div class="navbar-right">
-        <button class="nav-icon-btn theme-toggle-btn"><i class="fa-solid fa-moon"></i></button>
-        <div class="user-profile-menu">
-          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="avatar-img">
+      mountAppShell("harvest", `
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom flex-wrap gap-2">
+          <div>
+            <h4 class="fw-bold mb-1">Harvest Records</h4>
+            <p class="text-muted small mb-0">Record harvest weight, price, and buyer</p>
+          </div>
+          <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2">
+            Revenue: Rs.${Number(data.total_revenue).toFixed(2)}
+          </span>
         </div>
-      </div>
-    </header>
-
-    <main class="page-container">
-      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-        <div class="search-box">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" class="table-search-input" data-table-target="hrvTable" placeholder="Search harvests...">
+        <div class="${flash ? "" : "d-none"} alert alert-${flash?.type || "success"} py-2 small rounded-3 mb-3">${flash ? escapeHtml(flash.msg) : ""}</div>
+        <div class="row g-4">
+          <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 bg-white p-3">
+              <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-plus-circle me-1"></i> Add Harvest</h6>
+              <form id="harvestForm">
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Pond</label>
+                  <select name="pond_name" class="form-select" required>${pondOptions}</select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Date</label>
+                  <input type="date" name="harvest_date" class="form-control" value="${todayISO()}" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Quantity (kg)</label>
+                  <input type="number" step="0.1" name="quantity_kg" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Price per kg (Rs.)</label>
+                  <input type="number" step="0.01" name="price_per_kg" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Buyer Name</label>
+                  <input type="text" name="buyer_name" class="form-control">
+                </div>
+                <button class="btn btn-primary w-100 rounded-3" type="submit">Save Harvest</button>
+              </form>
+            </div>
+          </div>
+          <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3 bg-white p-3">
+              <h6 class="fw-bold text-primary mb-3">All Harvest Records</h6>
+              <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                  <thead class="table-light">
+                    <tr><th>Pond</th><th>Date</th><th>Qty</th><th>Price/kg</th><th>Total</th><th>Buyer</th></tr>
+                  </thead>
+                  <tbody>${rows}</tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
-        <button class="btn btn-primary-saas" onclick="showToast('Harvest log saved!', 'success')">
-          <i class="fa-solid fa-plus me-1"></i> Record Harvest Sale
-        </button>
-      </div>
+      `);
 
-      <div class="table-responsive mb-4">
-        <table class="table table-custom" id="hrvTable">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Pond</th>
-              <th>Harvest Date</th>
-              <th>Quantity (kg)</th>
-              <th>Avg Weight (ABW)</th>
-              <th>Buyer Name</th>
-              <th>Price / kg ($)</th>
-              <th>Total Revenue ($)</th>
-              <th class="text-end">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><span class="fw-bold text-primary">HRV-401</span></td>
-              <td>Pond Epsilon (05)</td>
-              <td>2026-07-02</td>
-              <td>4,200 kg</td>
-              <td>21.5 g</td>
-              <td>Pacific Seafood Exports</td>
-              <td>$7.20 / kg</td>
-              <td><span class="fw-bold text-success">$30,240.00</span></td>
-              <td class="text-end"><button class="btn btn-sm btn-outline-saas"><i class="fa-solid fa-pen"></i></button></td>
-            </tr>
-            <tr>
-              <td><span class="fw-bold text-primary">HRV-402</span></td>
-              <td>Pond Zeta (06)</td>
-              <td>2026-06-18</td>
-              <td>3,800 kg</td>
-              <td>19.8 g</td>
-              <td>Ocean Prime Traders</td>
-              <td>$6.80 / kg</td>
-              <td><span class="fw-bold text-success">$25,840.00</span></td>
-              <td class="text-end"><button class="btn btn-sm btn-outline-saas"><i class="fa-solid fa-pen"></i></button></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </main>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../assets/js/dummy-data.js"></script>
-<script src="../assets/js/main.js"></script>
+      document.getElementById("harvestForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        try {
+          const res = await API.post("/api/harvests", {
+            pond_name: fd.get("pond_name"),
+            harvest_date: fd.get("harvest_date"),
+            quantity_kg: Number(fd.get("quantity_kg")),
+            price_per_kg: Number(fd.get("price_per_kg")),
+            buyer_name: fd.get("buyer_name") || "",
+          });
+          await loadPage({ type: "success", msg: res.message });
+        } catch (err) {
+          await loadPage({ type: "danger", msg: err.message });
+        }
+      });
+    }
+    loadPage();
+  </script>
 </body>
 </html>
