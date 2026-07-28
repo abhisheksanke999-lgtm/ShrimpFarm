@@ -3,249 +3,112 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pond Preparation - Shrimp Farm Management</title>
+  <title>Ponds - AquaControl</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="../assets/css/style.css">
-  <link rel="stylesheet" href="../assets/css/components.css">
-  <link rel="stylesheet" href="../assets/css/modules.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
 </head>
-<body>
+<body class="bg-main">
+  <div id="app"></div>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+  <script>
+    async function loadPage(flash) {
+      const user = await requireAuth();
+      if (!user) return;
+      const ponds = await API.get("/api/ponds");
+      const rows = ponds.length
+        ? ponds.map((p) => `
+            <tr>
+              <td>#${p.pond_id}</td>
+              <td class="fw-bold text-primary">${escapeHtml(p.name)}</td>
+              <td>${escapeHtml(p.area_sqm)} acres</td>
+              <td>${escapeHtml(p.depth_m)} feets</td>
+              <td>${escapeHtml(p.water_source)}</td>
+              <td><span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">${escapeHtml(p.status)}</span></td>
+            </tr>`).join("")
+        : `<tr><td colspan="6" class="text-center text-muted py-3">No ponds yet. Add one using the form.</td></tr>`;
 
-<div class="app-wrapper">
-  <!-- Left Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="brand-logo"><i class="fa-solid fa-shrimp"></i></div>
-      <span class="brand-text">AquaControl</span>
-    </div>
-    <div class="sidebar-nav">
-      <div class="nav-section-title">MAIN MENU</div>
-      <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a>
-      <a href="pond.html" class="nav-item active"><i class="fa-solid fa-water"></i><span>Pond Preparation</span></a>
-      <a href="stocking.html" class="nav-item"><i class="fa-solid fa-boxes-packing"></i><span>Seed Stocking</span></a>
-      <a href="daily.html" class="nav-item"><i class="fa-solid fa-clipboard-list"></i><span>Daily Observation</span></a>
-      <a href="feed.html" class="nav-item"><i class="fa-solid fa-wheat-awn"></i><span>Feed Management</span></a>
-      <a href="water.html" class="nav-item"><i class="fa-solid fa-vial-circle-check"></i><span>Water Quality</span></a>
-      <div class="nav-section-title mt-3">OPERATIONS</div>
-      <a href="medicine.html" class="nav-item"><i class="fa-solid fa-capsules"></i><span>Medicine Records</span></a>
-      <a href="growth.html" class="nav-item"><i class="fa-solid fa-chart-line"></i><span>Growth Monitoring</span></a>
-      <a href="expense.html" class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i><span>Expense Records</span></a>
-      <a href="harvest.html" class="nav-item"><i class="fa-solid fa-truck-ramp-box"></i><span>Harvest Records</span></a>
-      <a href="profit.html" class="nav-item"><i class="fa-solid fa-calculator"></i><span>Profit Calculator</span></a>
-      <div class="nav-section-title mt-3">SYSTEM</div>
-      <a href="reports.html" class="nav-item"><i class="fa-solid fa-file-pdf"></i><span>Reports</span></a>
-      <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
-      <a href="login.html" class="nav-item text-danger"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
-    </div>
-  </aside>
-
-  <!-- Main Content -->
-  <div class="main-content">
-    <header class="top-navbar">
-      <div class="navbar-left">
-        <button class="sidebar-toggle-btn"><i class="fa-solid fa-bars-staggered"></i></button>
-        <h5 class="mb-0 fw-bold">Module 1: Pond Preparation</h5>
-      </div>
-      <div class="navbar-right">
-        <button class="nav-icon-btn theme-toggle-btn"><i class="fa-solid fa-moon"></i></button>
-        <div class="user-profile-menu">
-          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="avatar-img">
-        </div>
-      </div>
-    </header>
-
-    <main class="page-container">
-      <!-- Action Toolbar -->
-      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-        <div class="d-flex gap-2 align-items-center">
-          <div class="search-box">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" class="table-search-input" data-table-target="pondTable" placeholder="Search ponds by ID or Name...">
+      mountAppShell("pond", `
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+          <div>
+            <h4 class="fw-bold mb-1">Pond Management</h4>
+            <p class="text-muted small mb-0">View your ponds or add a new one</p>
           </div>
-          <select class="form-select form-select-sm" style="width: 160px;">
-            <option value="">All Statuses</option>
-            <option value="Active">Active</option>
-            <option value="Preparation">Preparation</option>
-            <option value="Harvested">Harvested</option>
-          </select>
         </div>
-
-        <div class="d-flex gap-2">
-          <!-- View Switcher -->
-          <div class="btn-group me-2" role="group">
-            <button id="btnViewTable" class="btn btn-primary-saas active"><i class="fa-solid fa-table-list me-1"></i> Table</button>
-            <button id="btnViewCard" class="btn btn-outline-saas"><i class="fa-solid fa-border-all me-1"></i> Cards</button>
-          </div>
-          <button class="btn btn-primary-saas" onclick="openModal('addPondModal')">
-            <i class="fa-solid fa-plus me-1"></i> Add New Pond
-          </button>
-        </div>
-      </div>
-
-      <!-- Table View -->
-      <div id="pondTableView" class="table-responsive mb-4">
-        <table class="table table-custom" id="pondTable">
-          <thead>
-            <tr>
-              <th>Pond ID</th>
-              <th>Pond Name</th>
-              <th>Area (m²)</th>
-              <th>Depth (m)</th>
-              <th>Water Source</th>
-              <th>Lime Applied</th>
-              <th>Disinfected</th>
-              <th>Status</th>
-              <th class="text-end">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><span class="fw-bold text-primary">POND-01</span></td>
-              <td>Pond Alpha (01)</td>
-              <td>5,000 m²</td>
-              <td>1.8 m</td>
-              <td>Borewell / Tidal</td>
-              <td>250 kg</td>
-              <td><span class="badge bg-success"><i class="fa-solid fa-check me-1"></i>Yes</span></td>
-              <td><span class="badge-custom badge-success">Active</span></td>
-              <td class="text-end">
-                <button class="btn btn-sm btn-outline-saas me-1" onclick="openModal('addPondModal')"><i class="fa-solid fa-pen"></i></button>
-                <button class="btn btn-sm btn-outline-danger" onclick="showToast('Pond deleted', 'danger')"><i class="fa-solid fa-trash"></i></button>
-              </td>
-            </tr>
-            <tr>
-              <td><span class="fw-bold text-primary">POND-02</span></td>
-              <td>Pond Beta (02)</td>
-              <td>4,500 m²</td>
-              <td>1.7 m</td>
-              <td>Sea Water Filtered</td>
-              <td>220 kg</td>
-              <td><span class="badge bg-success"><i class="fa-solid fa-check me-1"></i>Yes</span></td>
-              <td><span class="badge-custom badge-success">Active</span></td>
-              <td class="text-end">
-                <button class="btn btn-sm btn-outline-saas me-1" onclick="openModal('addPondModal')"><i class="fa-solid fa-pen"></i></button>
-                <button class="btn btn-sm btn-outline-danger" onclick="showToast('Pond deleted', 'danger')"><i class="fa-solid fa-trash"></i></button>
-              </td>
-            </tr>
-            <tr>
-              <td><span class="fw-bold text-primary">POND-04</span></td>
-              <td>Pond Delta (04)</td>
-              <td>4,000 m²</td>
-              <td>1.6 m</td>
-              <td>Borewell</td>
-              <td>200 kg</td>
-              <td><span class="badge bg-secondary">No</span></td>
-              <td><span class="badge-custom badge-warning">Preparation</span></td>
-              <td class="text-end">
-                <button class="btn btn-sm btn-outline-saas me-1" onclick="openModal('addPondModal')"><i class="fa-solid fa-pen"></i></button>
-                <button class="btn btn-sm btn-outline-danger" onclick="showToast('Pond deleted', 'danger')"><i class="fa-solid fa-trash"></i></button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Card View (Hidden by Default) -->
-      <div id="pondCardView" class="row g-4 d-none mb-4">
-        <div class="col-md-4">
-          <div class="card-saas">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h5 class="fw-bold mb-0">Pond Alpha (01)</h5>
-              <span class="badge-custom badge-success">Active</span>
+        <div id="flash" class="${flash ? "" : "d-none"} alert alert-${flash?.type || "success"} py-2 small rounded-3 mb-3">${flash ? escapeHtml(flash.msg) : ""}</div>
+        <div class="row g-4">
+          <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 bg-white p-3">
+              <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-plus-circle me-1"></i> Add New Pond</h6>
+              <form id="pondForm">
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Pond Name / ID</label>
+                  <input type="text" name="name" class="form-control" placeholder="e.g. Pond Alpha (01)" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Area (Acres)</label>
+                  <input type="number" step="0.01" name="area_sqm" class="form-control" placeholder="e.g. 2" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Depth (feets)</label>
+                  <input type="number" step="0.01" name="depth_m" class="form-control" placeholder="e.g. 6" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Water Source</label>
+                  <select name="water_source" class="form-select">
+                    <option value="Borewell">Borewell</option>
+                    <option value="Loose water">Loose water</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Status</label>
+                  <select name="status" class="form-select">
+                    <option value="Active">Active</option>
+                    <option value="Preparation">Preparation</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="Harvested">Harvested</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 rounded-3">Save Pond</button>
+              </form>
             </div>
-            <p class="text-muted small mb-3"><i class="fa-solid fa-location-dot me-1"></i> Area: 5,000 m² | Depth: 1.8 m</p>
-            <div class="mb-3">
-              <div class="d-flex justify-content-between small text-muted mb-1">
-                <span>Preparation Checklist Progress</span>
-                <span class="fw-bold text-success">100%</span>
-              </div>
-              <div class="progress" style="height: 6px;">
-                <div class="progress-bar bg-success" style="width: 100%;"></div>
+          </div>
+          <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3 bg-white p-3">
+              <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-water me-1"></i> All Ponds</h6>
+              <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                  <thead class="table-light">
+                    <tr><th>#ID</th><th>Pond Name</th><th>Area (Acres)</th><th>Depth (feet)</th><th>Water Source</th><th>Status</th></tr>
+                  </thead>
+                  <tbody>${rows}</tbody>
+                </table>
               </div>
             </div>
-            <div class="d-flex justify-content-between align-items-center border-top pt-2">
-              <span class="small text-muted">Lime: 250 kg</span>
-              <button class="btn btn-sm btn-outline-saas" onclick="openModal('addPondModal')">Edit Details</button>
-            </div>
           </div>
         </div>
-      </div>
+      `);
 
-    </main>
-  </div>
-</div>
-
-<!-- Add/Edit Pond Modal -->
-<div class="modal-custom-overlay" id="addPondModal">
-  <div class="modal-custom-card">
-    <div class="modal-custom-header">
-      <h5 class="mb-0 fw-bold"><i class="fa-solid fa-water text-primary me-2"></i>Add / Edit Pond Preparation</h5>
-      <button class="btn-close" onclick="closeModal('addPondModal')"></button>
-    </div>
-    <div class="modal-custom-body">
-      <form id="pondForm" onsubmit="event.preventDefault(); closeModal('addPondModal'); showToast('Pond saved successfully!', 'success');">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label small fw-semibold">Pond ID</label>
-            <input type="text" class="form-control" value="POND-05" required>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label small fw-semibold">Pond Name</label>
-            <input type="text" class="form-control" placeholder="e.g. Pond Epsilon" required>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label small fw-semibold">Area (sq meters)</label>
-            <input type="number" class="form-control" value="5000" required>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label small fw-semibold">Depth (meters)</label>
-            <input type="number" step="0.1" class="form-control" value="1.8" required>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label small fw-semibold">Water Source</label>
-            <select class="form-select">
-              <option>Borewell / Tidal</option>
-              <option>Sea Water Filtered</option>
-              <option>Estuary Reservoir</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label small fw-semibold">Disinfection Status</label>
-            <select class="form-select">
-              <option value="1">Completed (Chlorine / BKC)</option>
-              <option value="0">Pending</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label small fw-semibold">Lime Applied (kg)</label>
-            <input type="number" class="form-control" value="250">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label small fw-semibold">Fertilizer Details</label>
-            <input type="text" class="form-control" placeholder="Probiotics / Urea / Fermented juice">
-          </div>
-          <div class="col-12">
-            <label class="form-label small fw-semibold">Preparation Checklist</label>
-            <div class="d-flex gap-3 flex-wrap">
-              <div class="form-check"><input class="form-check-input" type="checkbox" checked><label class="form-check-label small">Sun Drying Soil</label></div>
-              <div class="form-check"><input class="form-check-input" type="checkbox" checked><label class="form-check-label small">Tilling & Liming</label></div>
-              <div class="form-check"><input class="form-check-input" type="checkbox" checked><label class="form-check-label small">Water Intake Filtering</label></div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-custom-footer mt-4">
-          <button type="button" class="btn btn-outline-saas" onclick="closeModal('addPondModal')">Cancel</button>
-          <button type="submit" class="btn btn-primary-saas">Save Pond Record</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../assets/js/dummy-data.js"></script>
-<script src="../assets/js/main.js"></script>
-<script src="../assets/js/modules.js"></script>
+      document.getElementById("pondForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        try {
+          const res = await API.post("/api/ponds", {
+            name: fd.get("name"),
+            area_sqm: Number(fd.get("area_sqm")),
+            depth_m: Number(fd.get("depth_m")),
+            water_source: fd.get("water_source"),
+            status: fd.get("status"),
+          });
+          await loadPage({ type: "success", msg: res.message });
+        } catch (err) {
+          await loadPage({ type: "danger", msg: err.message });
+        }
+      });
+    }
+    loadPage();
+  </script>
 </body>
 </html>

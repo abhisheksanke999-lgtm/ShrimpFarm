@@ -1,87 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Shrimp Farm Management System</title>
-  <!-- Bootstrap 5 CSS -->
+  <title>Login - AquaControl System</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Custom Styles -->
-  <link rel="stylesheet" href="../assets/css/style.css">
-  <link rel="stylesheet" href="../assets/css/components.css">
-  <link rel="stylesheet" href="../assets/css/modules.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
 </head>
-<body>
-  <div class="auth-wrapper">
-    <div class="auth-card animate-slide-up">
-      <div class="auth-brand">
-        <div class="auth-brand-logo">
-          <i class="fa-solid fa-shrimp"></i>
-        </div>
-        <h3 class="fw-bold text-primary mb-1">AquaControl SaaS</h3>
-        <p class="text-muted small">Shrimp Farm Record Management System</p>
+
+<body class="bg-main" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem;">
+
+  <div class="card shadow-md border-0 rounded-4 p-4" style="max-width: 420px; width: 100%; background: #ffffff;">
+    <div class="text-center mb-4">
+      <div class="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-circle mb-3"
+        style="width: 60px; height: 60px; font-size: 28px;">
+        <i class="fa-solid fa-shrimp"></i>
       </div>
+      <h3 class="fw-bold text-primary mb-1">AquaControl</h3>
+      <p class="text-muted small mb-0">Sign in to manage your farm records</p>
+    </div>
 
-      <form action="dashboard.html" method="GET">
-        <div class="form-floating-custom mb-3">
-          <input type="email" id="loginEmail" placeholder=" " required value="farmer@shrimpfarm.com">
-          <label for="loginEmail"><i class="fa-regular fa-envelope me-2"></i>Email Address</label>
+    <div id="errorAlert" class="alert alert-danger py-2 small rounded-3 mb-3 d-none"></div>
+    <div id="successAlert" class="alert alert-success py-2 small rounded-3 mb-3 d-none"></div>
+    <div id="jsErrorAlert" class="alert alert-warning py-2 small rounded-3 mb-3 d-none"></div>
+
+    <form id="loginForm" novalidate>
+      <div class="mb-3">
+        <label for="loginEmail" class="form-label small fw-semibold text-muted">Email Address</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light text-muted"><i class="fa-regular fa-envelope"></i></span>
+          <input type="email" class="form-control" id="loginEmail" name="email" placeholder="e.g. farmer@example.com" autocomplete="username">
         </div>
-
-        <div class="form-floating-custom mb-3" style="position: relative;">
-          <input type="password" id="loginPass" placeholder=" " required value="password123">
-          <label for="loginPass"><i class="fa-solid fa-lock me-2"></i>Password</label>
-          <button type="button" class="btn btn-sm text-muted position-absolute end-0 top-50 translate-middle-y me-2" onclick="togglePassVisibility('loginPass', this)">
+      </div>
+      <div class="mb-3">
+        <label for="loginPass" class="form-label small fw-semibold text-muted">Password</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-lock"></i></span>
+          <input type="password" class="form-control" id="loginPass" name="password" placeholder="Enter password" autocomplete="current-password">
+          <button type="button" class="btn btn-outline-secondary" id="togglePassBtn" aria-label="Show password">
             <i class="fa-regular fa-eye"></i>
           </button>
         </div>
-
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="rememberMe" checked>
-            <label class="form-check-label small text-muted" for="rememberMe">Remember Me</label>
-          </div>
-          <a href="forgot-password.html" class="small fw-semibold text-primary">Forgot Password?</a>
-        </div>
-
-        <button type="submit" class="btn btn-primary-saas w-100 py-2.5 mb-3">
-          <i class="fa-solid fa-right-to-bracket me-2"></i>Sign In to Dashboard
-        </button>
-      </form>
-
-      <div class="divider-with-text">
-        <span>OR CONTINUE WITH</span>
       </div>
+      <button type="submit" id="loginSubmitBtn" class="btn btn-primary w-100 py-2 rounded-3 fw-semibold mb-3">
+        <i class="fa-solid fa-right-to-bracket me-2"></i>Sign In
+      </button>
+    </form>
 
-      <div class="d-flex gap-2 mb-4">
-        <button type="button" class="social-login-btn">
-          <i class="fa-brands fa-google text-danger"></i> Google
-        </button>
-        <button type="button" class="social-login-btn">
-          <i class="fa-brands fa-apple text-dark"></i> Apple ID
-        </button>
-      </div>
-
-      <div class="text-center small text-muted">
-        Don't have an account? <a href="register.html" class="fw-semibold text-primary">Create Account</a>
-      </div>
+    <div class="text-center small text-muted mt-2">
+      Don't have an account? <a href="register.html" class="fw-bold text-primary">Create New Account</a>
+    </div>
+    <div class="mt-4 pt-3 border-top text-center text-muted small">
+      Sample login: admin@shrimpfarm.com / admin123
     </div>
   </div>
 
+  <script src="../js/api.js"></script>
   <script>
-    function togglePassVisibility(inputId, btn) {
-      const input = document.getElementById(inputId);
-      const icon = btn.querySelector('i');
-      if (input.type === 'password') {
-        input.type = 'text';
-        icon.className = 'fa-regular fa-eye-slash';
-      } else {
-        input.type = 'password';
-        icon.className = 'fa-regular fa-eye';
-      }
+    (async () => {
+      try {
+        await API.get("/api/auth/me");
+        window.location.href = pageUrl("dashboard.html");
+      } catch (_) { }
+    })();
+
+    if (new URLSearchParams(location.search).get("registered")) {
+      showAlert(document.getElementById("successAlert"), "Account created! Please sign in.", "success");
     }
+
+    document.getElementById("togglePassBtn").addEventListener("click", function () {
+      const input = document.getElementById("loginPass");
+      const icon = this.querySelector("i");
+      if (input.type === "password") {
+        input.type = "text";
+        icon.className = "fa-regular fa-eye-slash";
+      } else {
+        input.type = "password";
+        icon.className = "fa-regular fa-eye";
+      }
+    });
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPass").value;
+      const jsAlert = document.getElementById("jsErrorAlert");
+      const errorAlert = document.getElementById("errorAlert");
+      const submitBtn = document.getElementById("loginSubmitBtn");
+      hideAlert(jsAlert);
+      hideAlert(errorAlert);
+      hideAlert(document.getElementById("successAlert"));
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email) return showAlert(jsAlert, "Please enter your email address.", "warning");
+      if (!emailRegex.test(email)) return showAlert(jsAlert, "Please enter a valid email like name@example.com", "warning");
+      if (!password) return showAlert(jsAlert, "Please enter your password.", "warning");
+
+      submitBtn.disabled = true;
+      const originalLabel = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Signing in...';
+
+      try {
+        await API.post("/api/auth/login", { email, password });
+        window.location.href = pageUrl("dashboard.html");
+      } catch (err) {
+        showAlert(errorAlert, err.message || "Sign in failed. Please try again.", "danger");
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalLabel;
+      }
+    });
   </script>
 </body>
+
 </html>
