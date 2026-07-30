@@ -12,9 +12,10 @@ from app.models import User
 from app.routers import auth, daily, dashboard, expense, feed, harvest, ponds, reports_settings
 
 ROOT = Path(__file__).resolve().parents[2]
-PAGES = ROOT / "pages"
-CSS = ROOT / "css"
-JS = ROOT / "js"
+FRONTEND = ROOT / "frontend"
+PAGES = FRONTEND / "pages"
+CSS = FRONTEND / "css"
+JS = FRONTEND / "js"
 
 app = FastAPI(title="AquaControl API", version="2.0.0")
 
@@ -22,12 +23,7 @@ app = FastAPI(title="AquaControl API", version="2.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://127.0.0.1:5500",
-        "http://localhost:5500",
-        "http://127.0.0.1:5501",
-        "http://localhost:5501",
-        "http://127.0.0.1:3000",
-        "http://localhost:3000",
+        "https://your-vercel-app.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -82,7 +78,7 @@ def on_startup() -> None:
 
 @app.get("/")
 def root():
-    return RedirectResponse(url="/pages/login.html")
+    return FileResponse(FRONTEND / "index.html")
 
 
 @app.get("/pages/{page_name}")
@@ -92,7 +88,7 @@ def serve_page(page_name: str):
         page_name = f"{page_name}.html"
     target = PAGES / page_name
     if not target.exists() or not target.is_file():
-        return RedirectResponse(url="/pages/login.html")
+        return RedirectResponse(url="/")
     return FileResponse(target)
 
 
