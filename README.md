@@ -5,7 +5,7 @@
 - **Backend:** FastAPI
 - **Database:** PostgreSQL on [Neon](https://neon.tech)
 
-Old PHP/XAMPP files are still in the repo under `pages/*.php` and `api/*.php` but the app now runs through FastAPI.
+Old PHP/XAMPP files are obsolete; the app now runs through FastAPI with the HTML frontend under `frontend/`.
 
 ## 1. Create a Neon database
 1. Sign up at https://console.neon.tech
@@ -29,7 +29,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Open: **http://127.0.0.1:8000/pages/login.html**
+Open: **http://127.0.0.1:8000/**
 
 Sample account (auto-created on first start):
 - Email: `admin@shrimpfarm.com`
@@ -49,8 +49,10 @@ Sample account (auto-created on first start):
 ## Project layout
 ```
 Aquacontrol/
-  backend/          FastAPI app
-  pages/*.html      Frontend pages
-  js/               Shared frontend JS
-  css/              Same styles as before
+  backend/              FastAPI app
+  frontend/
+    index.html          Login page
+    pages/*.html        App pages
+    js/                 Shared frontend JS
+    css/                Same styles as before
 ```

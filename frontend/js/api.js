@@ -91,7 +91,7 @@ async function requireAuth() {
   try {
     return await API.get("/api/auth/me");
   } catch {
-    window.location.href = pageUrl("login.html");
+    window.location.href = pageUrl("../index.html");
     return null;
   }
 }
@@ -102,5 +102,5 @@ async function logout() {
   } catch (_) {
     /* ignore */
   }
-  window.location.href = pageUrl("login.html");
+  window.location.href = pageUrl("../index.html");
 }
