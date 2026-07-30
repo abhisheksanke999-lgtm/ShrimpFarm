@@ -22,7 +22,8 @@ app = FastAPI(title="AquaControl API", version="2.0.0")
 # Allow Live Server (and similar static hosts) to call the API with cookies
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://aquafarmcontrol.vercel.app"],
+    allow_origins=["https://aquafarmcontrol.vercel.app","http://localhost:5500",
+        "http://127.0.0.1:5500",],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
