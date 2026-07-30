@@ -7,7 +7,7 @@ BACKEND_DIR = Path(__file__).resolve().parents[1]
 
 
 class Settings(BaseSettings):
-    database_url: str = "postgresql://user:password@localhost:5432/aquacontrol"
+    database_url: str = "postgresql://neondb_owner:npg_ifFDhpaU70Xy@ep-summer-lake-azw67k8n-pooler.c-3.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
     secret_key: str = "dev-secret-change-me"
     access_token_expire_minutes: int = 60 * 24 * 7
     cookie_name: str = "aquacontrol_token"
