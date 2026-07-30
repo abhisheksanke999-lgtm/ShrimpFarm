@@ -1,9 +1,6 @@
 // Shared API helpers for AquaControl frontend
 // When opened via Live Server (:5500), API calls go to the FastAPI backend (:8000).
-const API_BASE =
-  window.location.port === "8000"
-    ? ""
-    : `${window.location.protocol}//${window.location.hostname}:8000`;
+const API_BASE = "https://acqacontrol.onrender.com";
 
 function pageUrl(name) {
   // Relative links work for both :8000/pages/... and Live Server .../pages/...
