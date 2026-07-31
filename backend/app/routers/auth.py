@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
 
 from app.auth import create_access_token, get_current_user, hash_password, verify_password
@@ -11,21 +11,30 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 settings = get_settings()
 
 
-def set_auth_cookie(response: Response, user_id: int) -> None:
+def _cookie_flags(request: Request) -> tuple[bool, str]:
+    # Cross-site frontends (Vercel → Render) need SameSite=None; Secure.
+    # Local HTTP same-origin uses Lax when COOKIE_SECURE is false.
+    secure = settings.cookie_secure or request.url.scheme == "https"
+    samesite = "none" if secure else "lax"
+    return secure, samesite
+
+
+def set_auth_cookie(response: Response, user_id: int, request: Request) -> None:
     token = create_access_token(user_id)
+    secure, samesite = _cookie_flags(request)
     response.set_cookie(
         key=settings.cookie_name,
         value=token,
         httponly=True,
-        samesite="lax",
-        secure=settings.cookie_secure,
+        samesite=samesite,
+        secure=secure,
         max_age=settings.access_token_expire_minutes * 60,
         path="/",
     )
 
 
 @router.post("/register", response_model=UserOut)
-def register(payload: RegisterIn, response: Response, db: Session = Depends(get_db)):
+def register(payload: RegisterIn, response: Response, request: Request, db: Session = Depends(get_db)):
     full_name = payload.full_name.strip()
     email = str(payload.email).strip().lower()
     password = payload.password.strip()
@@ -48,12 +57,12 @@ def register(payload: RegisterIn, response: Response, db: Session = Depends(get_
     db.add(user)
     db.commit()
     db.refresh(user)
-    set_auth_cookie(response, user.id)
+    set_auth_cookie(response, user.id, request)
     return user
 
 
 @router.post("/login", response_model=UserOut)
-def login(payload: LoginIn, response: Response, db: Session = Depends(get_db)):
+def login(payload: LoginIn, response: Response, request: Request, db: Session = Depends(get_db)):
     email = str(payload.email).strip().lower()
     password = payload.password.strip()
     if not password:
@@ -63,13 +72,19 @@ def login(payload: LoginIn, response: Response, db: Session = Depends(get_db)):
     if not user or not verify_password(password, user.password):
         raise HTTPException(status_code=400, detail="Wrong email or password. Please try again.")
 
-    set_auth_cookie(response, user.id)
+    set_auth_cookie(response, user.id, request)
     return user
 
 
 @router.post("/logout", response_model=MessageOut)
-def logout(response: Response):
-    response.delete_cookie(settings.cookie_name, path="/")
+def logout(response: Response, request: Request):
+    secure, samesite = _cookie_flags(request)
+    response.delete_cookie(
+        settings.cookie_name,
+        path="/",
+        samesite=samesite,
+        secure=secure,
+    )
     return {"message": "Logged out"}
 
 

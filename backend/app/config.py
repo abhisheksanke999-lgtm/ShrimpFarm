@@ -11,7 +11,8 @@ class Settings(BaseSettings):
     secret_key: str = "dev-secret-change-me"
     access_token_expire_minutes: int = 60 * 24 * 7
     cookie_name: str = "aquacontrol_token"
-    cookie_secure: bool = False
+    # True required for cross-origin auth (Vercel → Render). Set false for local HTTP same-origin.
+    cookie_secure: bool = True
     algorithm: str = "HS256"
 
     model_config = SettingsConfigDict(
