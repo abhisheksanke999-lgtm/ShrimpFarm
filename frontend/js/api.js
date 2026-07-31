@@ -1,10 +1,33 @@
 // Shared API helpers for AquaControl frontend
-// When opened via Live Server (:5500), API calls go to the FastAPI backend (:8000).
-const API_BASE = "https://acqacontrol.onrender.com";
+// Same-origin when FastAPI serves the UI; otherwise point at local or production API.
+const API_BASE = (() => {
+  const { hostname, port } = window.location;
+  const local = hostname === "localhost" || hostname === "127.0.0.1";
+  if (local && (port === "8000" || port === "")) {
+    return ""; // FastAPI serves pages + API — first-party cookies work
+  }
+  if (local) {
+    return "http://127.0.0.1:8000"; // Live Server → local backend
+  }
+  return "https://acqacontrol.onrender.com"; // Deployed frontend (e.g. Vercel)
+})();
 
 function pageUrl(name) {
   // Relative links work for both :8000/pages/... and Live Server .../pages/...
   return String(name || "").replace(/^\/pages\//, "");
+}
+
+function loginPageUrl() {
+  // FastAPI serves login at /; static hosts use ../index.html from pages/
+  const { port, pathname } = window.location;
+  if (port === "8000" || pathname === "/" || pathname === "/index.html") {
+    return "/";
+  }
+  if (pathname.startsWith("/pages/")) {
+    // Same host static deploy (e.g. Vercel) — root index is login
+    return "/";
+  }
+  return pageUrl("../index.html");
 }
 
 const API = {
@@ -91,7 +114,7 @@ async function requireAuth() {
   try {
     return await API.get("/api/auth/me");
   } catch {
-    window.location.href = pageUrl("../index.html");
+    window.location.href = loginPageUrl();
     return null;
   }
 }
@@ -102,5 +125,5 @@ async function logout() {
   } catch (_) {
     /* ignore */
   }
-  window.location.href = pageUrl("../index.html");
+  window.location.href = loginPageUrl();
 }
