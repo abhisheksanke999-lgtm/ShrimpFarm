@@ -80,6 +80,11 @@ def root():
     return FileResponse(FRONTEND / "index.html")
 
 
+@app.get("/index.html")
+def login_page():
+    return FileResponse(FRONTEND / "index.html")
+
+
 @app.get("/pages/{page_name}")
 def serve_page(page_name: str):
     # Allow .html pages only from pages/
