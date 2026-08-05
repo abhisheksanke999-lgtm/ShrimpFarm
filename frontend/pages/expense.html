@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/components.css">
 </head>
+
 <body class="bg-main">
   <div id="app"></div>
   <script src="../js/api.js"></script>
@@ -45,22 +47,22 @@
               <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-plus-circle me-1"></i> Add Expense</h6>
               <form id="expenseForm">
                 <div class="mb-3">
-                  <label class="form-label small fw-semibold">Date</label>
+                  <label class="form-label small fw-semibold">Date<span class="text-danger">*</span></label>
                   <input type="date" name="expense_date" class="form-control" value="${todayISO()}" required>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label small fw-semibold">Category</label>
+                  <label class="form-label small fw-semibold">Category<span class="text-danger">*</span></label>
                   <select name="category" class="form-select" required>
                     <option>Feed</option><option>Electricity</option><option>Medicine</option>
                     <option>Labor</option><option>Equipment</option><option>Other</option>
                   </select>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label small fw-semibold">Description</label>
+                  <label class="form-label small fw-semibold">Description<span class="text-danger">*</span></label>
                   <input type="text" name="description" class="form-control" required>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label small fw-semibold">Amount (Rs.)</label>
+                  <label class="form-label small fw-semibold">Amount (Rs.)<span class="text-danger">*</span></label>
                   <input type="number" step="0.01" name="amount" class="form-control" required>
                 </div>
                 <button class="btn btn-primary w-100 rounded-3" type="submit">Save Expense</button>
@@ -100,4 +102,5 @@
     loadPage();
   </script>
 </body>
+
 </html>

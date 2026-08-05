@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/components.css">
 </head>
+
 <body class="bg-main">
   <div id="app"></div>
   <script src="../js/api.js"></script>
@@ -45,27 +47,27 @@
               <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-plus-circle me-1"></i> Add Feed Record</h6>
               <form id="feedForm">
                 <div class="mb-3">
-                  <label class="form-label small fw-semibold">Pond</label>
+                  <label class="form-label small fw-semibold">Pond<span class="text-danger">*</span></label>
                   <select name="pond_name" class="form-select" required>${pondOptions}</select>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label small fw-semibold">Date</label>
+                  <label class="form-label small fw-semibold">Date<span class="text-danger">*</span></label>
                   <input type="date" name="entry_date" class="form-control" value="${todayISO()}" required>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label small fw-semibold">Feed Brand</label>
-                  <input type="text" name="feed_brand" class="form-control" required>
+                  <label class="form-label small fw-semibold">Feed Brand<span class="text-danger">*</span></label>
+                  <input type="text" name="feed_brand" placeholder="e.g. Pellets" class="form-control" required>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label small fw-semibold">Quantity (kg)</label>
-                  <input type="number" step="0.1" name="quantity_kg" class="form-control" required>
+                  <label class="form-label small fw-semibold">Quantity (kg)<span class="text-danger">*</span></label>
+                  <input type="number" step="0.1" name="quantity_kg" placeholder="e.g. 120" class="form-control" required>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label small fw-semibold">Feed Size</label>
-                  <input type="text" name="feed_size" class="form-control">
+                  <label class="form-label small fw-semibold">Feed Size<span class="text-danger">*</span></label>
+                  <input type="text" name="feed_size" placeholder="e.g. 1p, 2sp" class="form-control" required>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label small fw-semibold">Feeding Time</label>
+                  <label class="form-label small fw-semibold">Feeding Time<span class="text-danger">*</span></label>
                   <select name="feeding_time" class="form-select">
                     <option value="feed 1">feed 1</option>
                     <option value="feed 2">feed 2</option>
@@ -115,4 +117,5 @@
     loadPage();
   </script>
 </body>
+
 </html>
