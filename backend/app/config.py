@@ -15,13 +15,15 @@ class Settings(BaseSettings):
     cookie_secure: bool = True
     algorithm: str = "HS256"
 
-    # Gmail SMTP (same pattern as RentYaar). Leave SMTP_HOST empty to log OTP in server console.
+    # Gmail SMTP (same pattern as RentYaar). Required for real email delivery.
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_username: str = ""
     smtp_password: str = ""
     email_from: str = ""
     email_from_name: str = "AquaControl"
+    # If true and SMTP is empty, print OTP to server logs instead of emailing (local only).
+    allow_console_otp: bool = False
     otp_expiry_seconds: int = 300
     otp_length: int = 6
 
