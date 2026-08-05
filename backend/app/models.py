@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from decimal import Decimal
 
-from sqlalchemy import Date, DateTime, ForeignKey, Integer, Numeric, String, Text, func
+from sqlalchemy import Date, DateTime, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -47,6 +47,37 @@ class Pond(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     owner = relationship("User", back_populates="ponds")
+    seed_stockings = relationship("SeedStocking", back_populates="pond", cascade="all, delete-orphan")
+
+
+class SeedStocking(Base):
+    __tablename__ = "seed_stocking"
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id",
+            "supplier_name",
+            "batch_number",
+            name="uq_seed_stocking_user_supplier_batch",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    pond_id: Mapped[int] = mapped_column(ForeignKey("ponds.pond_id", ondelete="CASCADE"), nullable=False, index=True)
+    pl_stage: Mapped[str] = mapped_column(String(20), nullable=False)
+    supplier_name: Mapped[str] = mapped_column(String(120), nullable=False)
+    batch_number: Mapped[str] = mapped_column(String(100), nullable=False)
+    total_quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+    cost: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    stocking_date: Mapped[date] = mapped_column(Date, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    pond = relationship("Pond", back_populates="seed_stockings")
 
 
 class DailyObservation(Base):

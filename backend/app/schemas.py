@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 
 from pydantic import BaseModel, EmailStr, Field
@@ -177,3 +177,52 @@ class ExpenseListOut(BaseModel):
 class HarvestListOut(BaseModel):
     items: list[HarvestOut]
     total_revenue: float
+
+
+# Easy to extend later
+PL_STAGES = ("PL8", "PL10", "PL12", "PL15", "PL20")
+
+
+class SeedStockingCreate(BaseModel):
+    pond_id: int
+    pl_stage: str = Field(min_length=1, max_length=20)
+    supplier_name: str = Field(min_length=1, max_length=120)
+    batch_number: str = Field(min_length=1, max_length=100)
+    total_quantity: int = Field(gt=0)
+    cost: float = Field(gt=0)
+    stocking_date: date
+
+
+class SeedStockingUpdate(BaseModel):
+    pond_id: int
+    pl_stage: str = Field(min_length=1, max_length=20)
+    supplier_name: str = Field(min_length=1, max_length=120)
+    batch_number: str = Field(min_length=1, max_length=100)
+    total_quantity: int = Field(gt=0)
+    cost: float = Field(gt=0)
+    stocking_date: date
+
+
+class SeedStockingOut(BaseModel):
+    id: int
+    pond_id: int
+    pond_name: str
+    pl_stage: str
+    supplier_name: str
+    batch_number: str
+    total_quantity: int
+    cost: Decimal
+    cost_per_1000: float
+    stocking_date: date
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class SeedStockingListOut(BaseModel):
+    items: list[SeedStockingOut]
+    total_records: int
+    total_pl: int
+    total_cost: float
+    most_recent_date: date | None
