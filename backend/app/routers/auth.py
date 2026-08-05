@@ -55,7 +55,14 @@ def _otp_expiry() -> datetime:
     return datetime.now(timezone.utc) + timedelta(seconds=settings.otp_expiry_seconds)
 
 
+def _reload_settings() -> None:
+    global settings
+    get_settings.cache_clear()
+    settings = get_settings()
+
+
 def _issue_pending_otp(pending: PendingRegistration) -> None:
+    """Generate OTP and email it. Does not commit — caller commits only after success."""
     pending.otp_code = _generate_otp()
     pending.otp_expiry = _otp_expiry()
     try:
@@ -67,12 +74,7 @@ def _issue_pending_otp(pending: PendingRegistration) -> None:
 @router.post("/register", response_model=RegisterPendingOut)
 def register(payload: RegisterIn, db: Session = Depends(get_db)):
     """Start signup: store pending registration and email a 6-digit OTP (RentYaar-style)."""
-    # Always reload settings so .env SMTP changes apply after restart / cache clear
-    global settings
-    from app.config import get_settings as _gs
-
-    _gs.cache_clear()
-    settings = _gs()
+    _reload_settings()
 
     full_name = payload.full_name.strip()
     email = str(payload.email).strip().lower()
@@ -103,11 +105,12 @@ def register(payload: RegisterIn, db: Session = Depends(get_db)):
         )
         db.add(pending)
 
+    # Email first; only persist OTP after SMTP accepts the message
     _issue_pending_otp(pending)
     db.commit()
 
     return {
-        "message": "Verification code sent to your email.",
+        "message": "Verification code sent to your email. Check inbox and spam.",
         "email": email,
         "expires_in": settings.otp_expiry_seconds,
     }
@@ -163,11 +166,7 @@ def verify_otp(
 
 @router.post("/resend-otp", response_model=RegisterPendingOut)
 def resend_otp(payload: ResendOtpIn, db: Session = Depends(get_db)):
-    global settings
-    from app.config import get_settings as _gs
-
-    _gs.cache_clear()
-    settings = _gs()
+    _reload_settings()
 
     email = str(payload.email).strip().lower()
     pending = db.query(PendingRegistration).filter(PendingRegistration.email == email).first()
@@ -177,14 +176,11 @@ def resend_otp(payload: ResendOtpIn, db: Session = Depends(get_db)):
             detail="No pending registration found. Please register again.",
         )
 
-    try:
-        _issue_pending_otp(pending)
-    except HTTPException:
-        raise
+    _issue_pending_otp(pending)
     db.commit()
 
     return {
-        "message": "A new verification code has been sent.",
+        "message": "A new verification code has been sent. Check inbox and spam.",
         "email": email,
         "expires_in": settings.otp_expiry_seconds,
     }
