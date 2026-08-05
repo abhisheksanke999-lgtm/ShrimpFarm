@@ -1,11 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+import secrets
+from datetime import datetime, timedelta, timezone
+
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 
 from app.auth import create_access_token, get_current_user, hash_password, verify_password
 from app.config import get_settings
 from app.database import get_db
-from app.models import User
-from app.schemas import LoginIn, MessageOut, RegisterIn, UserOut
+from app.email_service import send_otp_email
+from app.models import PendingRegistration, User
+from app.schemas import (
+    LoginIn,
+    MessageOut,
+    RegisterIn,
+    RegisterPendingOut,
+    ResendOtpIn,
+    UserOut,
+    VerifyOtpIn,
+)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 settings = get_settings()
@@ -33,8 +45,35 @@ def set_auth_cookie(response: Response, user_id: int, request: Request) -> None:
     )
 
 
-@router.post("/register", response_model=UserOut)
-def register(payload: RegisterIn, response: Response, request: Request, db: Session = Depends(get_db)):
+def _generate_otp() -> str:
+    length = max(4, min(settings.otp_length, 12))
+    upper = 10**length
+    return str(secrets.randbelow(upper)).zfill(length)
+
+
+def _otp_expiry() -> datetime:
+    return datetime.now(timezone.utc) + timedelta(seconds=settings.otp_expiry_seconds)
+
+
+def _issue_pending_otp(pending: PendingRegistration) -> None:
+    pending.otp_code = _generate_otp()
+    pending.otp_expiry = _otp_expiry()
+    try:
+        send_otp_email(pending.email, pending.otp_code, settings.otp_expiry_seconds)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@router.post("/register", response_model=RegisterPendingOut)
+def register(payload: RegisterIn, db: Session = Depends(get_db)):
+    """Start signup: store pending registration and email a 6-digit OTP (RentYaar-style)."""
+    # Always reload settings so .env SMTP changes apply after restart / cache clear
+    global settings
+    from app.config import get_settings as _gs
+
+    _gs.cache_clear()
+    settings = _gs()
+
     full_name = payload.full_name.strip()
     email = str(payload.email).strip().lower()
     password = payload.password.strip()
@@ -44,21 +83,111 @@ def register(payload: RegisterIn, response: Response, request: Request, db: Sess
     if len(password) < 4:
         raise HTTPException(status_code=400, detail="Password must be at least 4 characters.")
 
-    exists = db.query(User).filter(User.email == email).first()
-    if exists:
-        raise HTTPException(status_code=400, detail="This email is already registered. Please sign in instead.")
+    if db.query(User).filter(User.email == email).first():
+        raise HTTPException(
+            status_code=400,
+            detail="This email is already registered. Please sign in instead.",
+        )
+
+    pending = db.query(PendingRegistration).filter(PendingRegistration.email == email).first()
+    if pending:
+        pending.full_name = full_name
+        pending.password = hash_password(password)
+    else:
+        pending = PendingRegistration(
+            full_name=full_name,
+            email=email,
+            password=hash_password(password),
+            otp_code="000000",
+            otp_expiry=_otp_expiry(),
+        )
+        db.add(pending)
+
+    _issue_pending_otp(pending)
+    db.commit()
+
+    return {
+        "message": "Verification code sent to your email.",
+        "email": email,
+        "expires_in": settings.otp_expiry_seconds,
+    }
+
+
+@router.post("/verify-otp", response_model=UserOut)
+def verify_otp(
+    payload: VerifyOtpIn,
+    response: Response,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    email = str(payload.email).strip().lower()
+    otp_code = payload.otp_code.strip()
+
+    pending = db.query(PendingRegistration).filter(PendingRegistration.email == email).first()
+    if not pending:
+        raise HTTPException(
+            status_code=400,
+            detail="No pending registration found. Please register again.",
+        )
+
+    if pending.otp_code != otp_code:
+        raise HTTPException(status_code=400, detail="Invalid verification code.")
+
+    expiry = pending.otp_expiry
+    if expiry.tzinfo is None:
+        expiry = expiry.replace(tzinfo=timezone.utc)
+    if datetime.now(timezone.utc) > expiry:
+        raise HTTPException(status_code=400, detail="Verification code expired. Please resend.")
+
+    if db.query(User).filter(User.email == email).first():
+        db.delete(pending)
+        db.commit()
+        raise HTTPException(
+            status_code=400,
+            detail="This email is already registered. Please sign in instead.",
+        )
 
     user = User(
-        full_name=full_name,
-        email=email,
-        password=hash_password(password),
+        full_name=pending.full_name,
+        email=pending.email,
+        password=pending.password,
         role="Farmer",
     )
     db.add(user)
+    db.delete(pending)
     db.commit()
     db.refresh(user)
     set_auth_cookie(response, user.id, request)
     return user
+
+
+@router.post("/resend-otp", response_model=RegisterPendingOut)
+def resend_otp(payload: ResendOtpIn, db: Session = Depends(get_db)):
+    global settings
+    from app.config import get_settings as _gs
+
+    _gs.cache_clear()
+    settings = _gs()
+
+    email = str(payload.email).strip().lower()
+    pending = db.query(PendingRegistration).filter(PendingRegistration.email == email).first()
+    if not pending:
+        raise HTTPException(
+            status_code=400,
+            detail="No pending registration found. Please register again.",
+        )
+
+    try:
+        _issue_pending_otp(pending)
+    except HTTPException:
+        raise
+    db.commit()
+
+    return {
+        "message": "A new verification code has been sent.",
+        "email": email,
+        "expires_in": settings.otp_expiry_seconds,
+    }
 
 
 @router.post("/login", response_model=UserOut)

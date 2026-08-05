@@ -15,6 +15,16 @@ class Settings(BaseSettings):
     cookie_secure: bool = True
     algorithm: str = "HS256"
 
+    # Gmail SMTP (same pattern as RentYaar). Leave SMTP_HOST empty to log OTP in server console.
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    email_from: str = ""
+    email_from_name: str = "AquaControl"
+    otp_expiry_seconds: int = 300
+    otp_length: int = 6
+
     model_config = SettingsConfigDict(
         env_file=str(BACKEND_DIR / ".env"),
         env_file_encoding="utf-8",
