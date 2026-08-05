@@ -36,13 +36,28 @@ Sample account (auto-created on first start):
 - Password: `admin123`
 
 ## Features kept the same
-- Login / Register / Logout
+- Login / Register (email OTP verification) / Logout
 - Per-user data isolation (`user_id`)
 - Ponds, Daily logs, Feed, Expenses, Harvest, Reports, Settings
 - Harvest marks pond as Harvested
 - Same CSS theme and sidebar layout
 - Mobile: hamburger menu opens the sidebar
 
+## Email OTP (register)
+Configure Gmail SMTP in `backend/.env` (same pattern as RentYaar):
+
+```
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+EMAIL_FROM=your-email@gmail.com
+OTP_EXPIRY_SECONDS=300
+```
+
+If `SMTP_HOST` is empty, the OTP is printed in the server console for local testing.
+
+Flow: **Register** → email OTP → **Verify** (`/pages/verify-otp.html`) → dashboard.
 ## API docs
 - Swagger UI: http://127.0.0.1:8000/docs
 
