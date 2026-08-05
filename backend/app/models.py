@@ -20,6 +20,20 @@ class User(Base):
     ponds = relationship("Pond", back_populates="owner", cascade="all, delete-orphan")
 
 
+class PendingRegistration(Base):
+    """Signup waiting for email OTP verification (RentYaar-style)."""
+
+    __tablename__ = "pending_registrations"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    full_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False, index=True)
+    password: Mapped[str] = mapped_column(String(255), nullable=False)
+    otp_code: Mapped[str] = mapped_column(String(12), nullable=False)
+    otp_expiry: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class Pond(Base):
     __tablename__ = "ponds"
 

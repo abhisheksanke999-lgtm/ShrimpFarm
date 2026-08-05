@@ -28,6 +28,21 @@ class RegisterIn(BaseModel):
     password: str = Field(min_length=4, max_length=128)
 
 
+class RegisterPendingOut(BaseModel):
+    message: str
+    email: EmailStr
+    expires_in: int
+
+
+class VerifyOtpIn(BaseModel):
+    email: EmailStr
+    otp_code: str = Field(min_length=4, max_length=12)
+
+
+class ResendOtpIn(BaseModel):
+    email: EmailStr
+
+
 class ProfileUpdateIn(BaseModel):
     full_name: str = Field(min_length=1, max_length=100)
 
