@@ -3,6 +3,7 @@ function renderSidebar(active) {
   const items = [
     { key: "dashboard", href: "dashboard.html", icon: "fa-house", label: "Dashboard", color: "text-primary" },
     { key: "pond", href: "pond.html", icon: "fa-water", label: "Ponds", color: "text-primary" },
+    { key: "seed", href: "seed-stocking.html", icon: "fa-seedling", label: "Seed Stocking", color: "text-success" },
     { key: "daily", href: "daily.html", icon: "fa-clipboard-list", label: "Daily Observation", color: "text-success" },
     { key: "feed", href: "feed.html", icon: "fa-wheat-awn", label: "Feed Records", color: "text-warning" },
     { key: "expense", href: "expense.html", icon: "fa-wallet", label: "Expense Records", color: "text-danger" },

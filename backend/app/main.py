@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.auth import hash_password, verify_password
 from app.database import Base, SessionLocal, engine, test_connection
 from app.models import User
-from app.routers import auth, daily, dashboard, expense, feed, harvest, ponds, reports_settings
+from app.routers import auth, daily, dashboard, expense, feed, harvest, ponds, reports_settings, seed_stocking
 
 ROOT = Path(__file__).resolve().parents[2]
 FRONTEND = ROOT / "frontend"
@@ -35,6 +35,7 @@ app.include_router(daily.router)
 app.include_router(feed.router)
 app.include_router(expense.router)
 app.include_router(harvest.router)
+app.include_router(seed_stocking.router)
 app.include_router(dashboard.router)
 app.include_router(reports_settings.router)
 
