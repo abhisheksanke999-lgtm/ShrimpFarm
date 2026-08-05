@@ -89,8 +89,12 @@
       submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating...';
 
       try {
-        await API.post("/api/auth/register", { full_name, email, password });
-        window.location.href = pageUrl("dashboard.html");
+        const data = await API.post("/api/auth/register", { full_name, email, password });
+        const q = new URLSearchParams({
+          email,
+          expires_in: String(data?.expires_in || 90),
+        });
+        window.location.href = pageUrl(`verify-otp.html?${q.toString()}`);
       } catch (err) {
         showAlert(errorAlert, err.message || "Registration failed. Please try again.", "danger");
         submitBtn.disabled = false;
