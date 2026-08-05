@@ -44,18 +44,24 @@ Sample account (auto-created on first start):
 - Mobile: hamburger menu opens the sidebar
 
 ## Email OTP (register)
-Configure Gmail SMTP in `backend/.env` (same pattern as RentYaar):
+
+**Important:** Render free hosting **blocks Gmail SMTP** (ports 587/465), which causes
+`Network is unreachable`. Use **Brevo** (HTTPS) on Render.
+
+1. Create a free account: https://app.brevo.com  
+2. SMTP & API → API Keys → create a key  
+3. Senders → add/verify `EMAIL_FROM` (e.g. your Gmail)  
+4. On Render → Environment set:
 
 ```
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USERNAME=your-email@gmail.com
-SMTP_PASSWORD=your-app-password
+BREVO_API_KEY=xkeysib-...
 EMAIL_FROM=your-email@gmail.com
-OTP_EXPIRY_SECONDS=300
+EMAIL_FROM_NAME=AquaControl
 ```
 
-If `SMTP_HOST` is empty, the OTP is printed in the server console for local testing.
+5. Redeploy the API, then register again.
+
+Local `uvicorn` can still use Gmail SMTP via `SMTP_*` in `backend/.env`.
 
 Flow: **Register** → email OTP → **Verify** (`/pages/verify-otp.html`) → dashboard.
 ## API docs

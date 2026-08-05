@@ -15,14 +15,18 @@ class Settings(BaseSettings):
     cookie_secure: bool = True
     algorithm: str = "HS256"
 
-    # Gmail SMTP (same pattern as RentYaar). Required for real email delivery.
+    # HTTPS email APIs (required on Render — SMTP ports are blocked there)
+    brevo_api_key: str = ""
+    resend_api_key: str = ""
+
+    # Gmail SMTP (works on local PC; blocked on Render free tier)
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_username: str = ""
     smtp_password: str = ""
     email_from: str = ""
     email_from_name: str = "AquaControl"
-    # If true and SMTP is empty, print OTP to server logs instead of emailing (local only).
+    # If true and no email provider works, print OTP to server logs (local only).
     allow_console_otp: bool = False
     otp_expiry_seconds: int = 300
     otp_length: int = 6
