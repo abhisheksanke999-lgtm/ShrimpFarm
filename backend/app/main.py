@@ -66,15 +66,36 @@ def seed_admin(db: Session) -> None:
 
 @app.on_event("startup")
 def on_startup() -> None:
-    # Verify Neon/Postgres connection, then create tables
-    test_connection()
-    Base.metadata.create_all(bind=engine)
-    db = SessionLocal()
-    try:
-        seed_admin(db)
-    finally:
-        db.close()
+    """Connect to Neon, create tables, seed admin. Retries on temporary DNS/network blips."""
+    import time
 
+    last_error: Exception | None = None
+    for attempt in range(1, 4):
+        try:
+            info = test_connection()
+            Base.metadata.create_all(bind=engine)
+            db = SessionLocal()
+            try:
+                seed_admin(db)
+            finally:
+                db.close()
+            print(f"Database connected OK (attempt {attempt}).")
+            if info.get("version"):
+                print(f"Postgres: {str(info['version'])[:80]}...")
+            return
+        except Exception as exc:
+            last_error = exc
+            print(f"Database connect attempt {attempt}/3 failed: {exc}")
+            if attempt < 3:
+                time.sleep(2)
+
+    # Do not kill the process — server stays up; /health shows disconnected
+    print(
+        "WARNING: Could not reach Neon Postgres. "
+        "Check internet/DNS, VPN/firewall, and DATABASE_URL in backend/.env. "
+        "The API is running but DB routes will fail until connectivity returns.\n"
+        f"Last error: {last_error}"
+    )
 
 @app.get("/")
 def root():
