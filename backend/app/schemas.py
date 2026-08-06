@@ -16,6 +16,8 @@ class PredictionOut(BaseModel):
 class DailyPredictionResponse(BaseModel):
     message: str
     prediction: PredictionOut
+
+
 class UserOut(BaseModel):
     id: int
     full_name: str
