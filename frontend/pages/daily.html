@@ -44,6 +44,30 @@
           <p class="text-muted small mb-0">Record water readings and shrimp health</p>
         </div>
         <div id="flash" class="${flash ? "" : "d-none"} alert alert-${flash?.type || "success"} py-2 small rounded-3 mb-3">${flash ? escapeHtml(flash.msg) : ""}</div>
+        <div id="predictionBox" class="d-none mb-3">
+    <div class="card border-0 shadow rounded-3">
+        <div class="card-body">
+
+            <h5 class="fw-bold text-primary mb-3">
+                🦐 AI Disease Prediction
+            </h5>
+
+            <h4 id="riskLevel"></h4>
+
+            <p class="mb-1">
+                <strong>Confidence:</strong>
+                <span id="confidence"></span>%
+            </p>
+
+            <hr>
+
+            <h6>Recommendations</h6>
+
+            <ul id="recommendations"></ul>
+
+        </div>
+    </div>
+</div>
         <div class="row g-4">
           <div class="col-12 col-lg-4">
             <div class="card border-0 shadow-sm rounded-3 bg-white p-3">
@@ -115,17 +139,55 @@
         const fd = new FormData(e.target);
         try {
           const res = await API.post("/api/daily", {
-            pond_name: fd.get("pond_name"),
-            log_date: fd.get("log_date"),
-            temperature: Number(fd.get("temperature") || 0),
-            ph: Number(fd.get("ph") || 0),
-            salinity: Number(fd.get("salinity") || 0),
-            dissolved_oxygen: Number(fd.get("dissolved_oxygen") || 0),
-            water_color: fd.get("water_color"),
-            mortality_count: Number(fd.get("mortality_count") || 0),
-            notes: fd.get("notes") || "",
-          });
-          await loadPage({ type: "success", msg: res.message });
+    pond_name: fd.get("pond_name"),
+    log_date: fd.get("log_date"),
+    temperature: Number(fd.get("temperature") || 0),
+    ph: Number(fd.get("ph") || 0),
+    salinity: Number(fd.get("salinity") || 0),
+    dissolved_oxygen: Number(fd.get("dissolved_oxygen") || 0),
+    water_color: fd.get("water_color"),
+    mortality_count: Number(fd.get("mortality_count") || 0),
+    notes: fd.get("notes") || "",
+});
+
+// Success message
+document.getElementById("flash").className =
+    "alert alert-success py-2 small rounded-3 mb-3";
+document.getElementById("flash").innerHTML = res.message;
+document.getElementById("flash").classList.remove("d-none");
+
+// Show prediction card
+document.getElementById("predictionBox").classList.remove("d-none");
+
+// Risk
+const risk = res.prediction.disease_risk;
+const riskElement = document.getElementById("riskLevel");
+
+if (risk === "Healthy") {
+    riskElement.innerHTML = "🟢 Healthy";
+    riskElement.className = "text-success fw-bold";
+}
+else if (risk === "Moderate") {
+    riskElement.innerHTML = "🟡 Moderate";
+    riskElement.className = "text-warning fw-bold";
+}
+else {
+    riskElement.innerHTML = "🔴 High Risk";
+    riskElement.className = "text-danger fw-bold";
+}
+
+// Confidence
+document.getElementById("confidence").innerHTML =
+    res.prediction.confidence;
+
+// Recommendations
+document.getElementById("recommendations").innerHTML =
+    res.prediction.recommendations
+        .map(r => `<li>${r}</li>`)
+        .join("");
+
+// Reset form
+e.target.reset();
         } catch (err) {
           await loadPage({ type: "danger", msg: err.message });
         }

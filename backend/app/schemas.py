@@ -7,7 +7,15 @@ from pydantic import BaseModel, EmailStr, Field
 class MessageOut(BaseModel):
     message: str
 
+class PredictionOut(BaseModel):
+    disease_risk: str
+    confidence: float
+    recommendations: list[str]
 
+
+class DailyPredictionResponse(BaseModel):
+    message: str
+    prediction: PredictionOut
 class UserOut(BaseModel):
     id: int
     full_name: str
