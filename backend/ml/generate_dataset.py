@@ -1,15 +1,17 @@
+from pathlib import Path
+
 import pandas as pd
 import random
-import os
 
 NUM_RECORDS = 10000
+ML_DIR = Path(__file__).resolve().parent
 
 water_colors = [
     "Green",
     "Light Green",
     "Dark Green",
     "Brown",
-    "Black"
+    "Black",
 ]
 
 data = []
@@ -94,11 +96,14 @@ columns = [
 df = pd.DataFrame(data, columns=columns)
 
 # Create dataset folder if it doesn't exist
-os.makedirs("ml/dataset", exist_ok=True)
+dataset_dir = ML_DIR / "dataset"
+dataset_dir.mkdir(parents=True, exist_ok=True)
 
 # Save CSV
-df.to_csv("ml/dataset/shrimp_disease_dataset.csv", index=False)
+out_path = dataset_dir / "shrimp_disease_dataset.csv"
+df.to_csv(out_path, index=False)
 
-print("✅ Dataset Created Successfully!")
+print("Dataset Created Successfully!")
+print(f"Saved to: {out_path}")
 print(f"Total Records: {len(df)}")
 print(df.head())

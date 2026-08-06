@@ -1,16 +1,19 @@
-import pandas as pd
-import joblib
+from pathlib import Path
 
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
+import joblib
+import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+
+ML_DIR = Path(__file__).resolve().parent
 
 # ==============================
 # Load Dataset
 # ==============================
 
-df = pd.read_csv("ml/dataset/shrimp_disease_dataset.csv")
+df = pd.read_csv(ML_DIR / "dataset" / "shrimp_disease_dataset.csv")
 
 print("Dataset Loaded Successfully!")
 print(df.head())
@@ -41,7 +44,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     y,
     test_size=0.2,
     random_state=42,
-    stratify=y
+    stratify=y,
 )
 
 # ==============================
@@ -50,7 +53,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 model = RandomForestClassifier(
     n_estimators=200,
-    random_state=42
+    random_state=42,
 )
 
 model.fit(X_train, y_train)
@@ -82,8 +85,9 @@ print(confusion_matrix(y_test, y_pred))
 # Save Model
 # ==============================
 
-joblib.dump(model, "ml/disease_model.pkl")
-joblib.dump(water_encoder, "ml/water_encoder.pkl")
-joblib.dump(disease_encoder, "ml/disease_encoder.pkl")
+joblib.dump(model, ML_DIR / "disease_model.pkl")
+joblib.dump(water_encoder, ML_DIR / "water_encoder.pkl")
+joblib.dump(disease_encoder, ML_DIR / "disease_encoder.pkl")
 
 print("\nModel Saved Successfully!")
+print(f"Saved under: {ML_DIR}")
