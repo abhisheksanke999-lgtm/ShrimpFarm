@@ -29,6 +29,7 @@ def normalize_database_url(url: str) -> str:
 
 settings = get_settings()
 DATABASE_URL = normalize_database_url(settings.database_url)
+print("DATABASE_URL =", DATABASE_URL)
 
 engine = create_engine(
     DATABASE_URL,

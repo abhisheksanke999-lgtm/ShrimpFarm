@@ -1,4 +1,5 @@
 from pathlib import Path
+import time
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,25 +10,63 @@ from sqlalchemy.orm import Session
 from app.auth import hash_password, verify_password
 from app.database import Base, SessionLocal, engine, test_connection
 from app.models import User
-from app.routers import auth, daily, dashboard, expense, feed, harvest, ponds, reports_settings, seed_stocking
+
+from app.routers import (
+    auth,
+    daily,
+    dashboard,
+    expense,
+    feed,
+    harvest,
+    ponds,
+    reports_settings,
+    seed_stocking,
+    ml_api,
+)
+
+
+# =========================================================
+# FRONTEND PATHS
+# =========================================================
 
 ROOT = Path(__file__).resolve().parents[2]
+
 FRONTEND = ROOT / "frontend"
 PAGES = FRONTEND / "pages"
 CSS = FRONTEND / "css"
 JS = FRONTEND / "js"
 
-app = FastAPI(title="AquaControl API", version="2.0.0")
 
-# Allow Live Server (and similar static hosts) to call the API with cookies
+# =========================================================
+# FASTAPI APPLICATION
+# =========================================================
+
+app = FastAPI(
+    title="AquaControl API",
+    version="2.0.0",
+)
+
+
+# =========================================================
+# CORS
+# =========================================================
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://aquafarmcontrol.vercel.app","http://localhost:5500",
-        "http://127.0.0.1:5500",],
+    allow_origins=[
+        "https://aquafarmcontrol.vercel.app",
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# =========================================================
+# ROUTERS
+# =========================================================
 
 app.include_router(auth.router)
 app.include_router(ponds.router)
@@ -39,20 +78,55 @@ app.include_router(seed_stocking.router)
 app.include_router(dashboard.router)
 app.include_router(reports_settings.router)
 
-app.mount("/css", StaticFiles(directory=str(CSS)), name="css")
-app.mount("/js", StaticFiles(directory=str(JS)), name="js")
+# AI prediction routes
+app.include_router(ml_api.router)
 
+
+# =========================================================
+# STATIC FRONTEND FILES
+# =========================================================
+
+app.mount(
+    "/css",
+    StaticFiles(directory=str(CSS)),
+    name="css",
+)
+
+app.mount(
+    "/js",
+    StaticFiles(directory=str(JS)),
+    name="js",
+)
+
+
+# =========================================================
+# ADMIN SEED
+# =========================================================
 
 def seed_admin(db: Session) -> None:
+
     email = "admin@shrimpfarm.com"
     password = "admin123"
-    existing = db.query(User).filter(User.email == email).first()
+
+    existing = (
+        db.query(User)
+        .filter(User.email == email)
+        .first()
+    )
+
     if existing:
-        # Repair sample admin if password hash is invalid/outdated
-        if not verify_password(password, existing.password):
+
+        # Repair sample admin if password hash
+        # is invalid or outdated
+        if not verify_password(
+            password,
+            existing.password,
+        ):
             existing.password = hash_password(password)
             db.commit()
+
         return
+
     db.add(
         User(
             full_name="Farm Admin",
@@ -61,67 +135,151 @@ def seed_admin(db: Session) -> None:
             role="Farm Owner",
         )
     )
+
     db.commit()
 
 
+# =========================================================
+# DATABASE STARTUP
+# =========================================================
+
 @app.on_event("startup")
 def on_startup() -> None:
-    """Connect to Neon, create tables, seed admin. Retries on temporary DNS/network blips."""
-    import time
+
+    """
+    Connect to Neon, create tables,
+    seed admin and retry temporary
+    connection failures.
+    """
 
     last_error: Exception | None = None
+
     for attempt in range(1, 4):
+
         try:
+
+            # Test Neon/PostgreSQL connection
             info = test_connection()
-            Base.metadata.create_all(bind=engine)
+
+            # Create database tables
+            print(Base.metadata.tables.keys())
+
+            Base.metadata.create_all(
+                bind=engine
+            )
+
+            print(
+                "Tables created successfully"
+            )
+
+            # Seed admin account
             db = SessionLocal()
+
             try:
                 seed_admin(db)
+
             finally:
                 db.close()
-            print(f"Database connected OK (attempt {attempt}).")
+
+            print(
+                f"Database connected OK "
+                f"(attempt {attempt})."
+            )
+
             if info.get("version"):
-                print(f"Postgres: {str(info['version'])[:80]}...")
+
+                print(
+                    f"Postgres: "
+                    f"{str(info['version'])[:80]}..."
+                )
+
             return
+
         except Exception as exc:
+
             last_error = exc
-            print(f"Database connect attempt {attempt}/3 failed: {exc}")
+
+            print(
+                f"Database connect attempt "
+                f"{attempt}/3 failed: {exc}"
+            )
+
             if attempt < 3:
                 time.sleep(2)
 
-    # Do not kill the process — server stays up; /health shows disconnected
+    # Keep FastAPI running even if Neon
+    # is temporarily unavailable.
+
     print(
         "WARNING: Could not reach Neon Postgres. "
-        "Check internet/DNS, VPN/firewall, and DATABASE_URL in backend/.env. "
-        "The API is running but DB routes will fail until connectivity returns.\n"
+        "Check internet/DNS, VPN/firewall, "
+        "and DATABASE_URL in backend/.env. "
+        "The API is running but DB routes "
+        "will fail until connectivity returns.\n"
         f"Last error: {last_error}"
     )
 
+
+# =========================================================
+# FRONTEND ROUTES
+# =========================================================
+
 @app.get("/")
 def root():
-    return FileResponse(FRONTEND / "index.html")
+
+    return FileResponse(
+        FRONTEND / "index.html"
+    )
 
 
 @app.get("/index.html")
 def login_page():
-    return FileResponse(FRONTEND / "index.html")
+
+    return FileResponse(
+        FRONTEND / "index.html"
+    )
 
 
 @app.get("/pages/{page_name}")
 def serve_page(page_name: str):
-    # Allow .html pages only from pages/
+
+    # Allow .html pages only
+    # from frontend/pages/
+
     if not page_name.endswith(".html"):
         page_name = f"{page_name}.html"
+
     target = PAGES / page_name
+
     if not target.exists() or not target.is_file():
-        return RedirectResponse(url="/")
+        return RedirectResponse(
+            url="/"
+        )
+
     return FileResponse(target)
 
 
+# =========================================================
+# HEALTH CHECK
+# =========================================================
+
 @app.get("/health")
 def health():
+
     try:
+
         info = test_connection()
-        return {"status": "ok", "database": "connected", "postgres": info.get("version")}
+
+        return {
+            "status": "ok",
+            "database": "connected",
+            "postgres": info.get("version"),
+        }
+
     except Exception as exc:
-        return {"status": "error", "database": "disconnected", "detail": str(exc)}
+
+        return {
+            "status": "error",
+            "database": "disconnected",
+            "detail": str(exc),
+        }

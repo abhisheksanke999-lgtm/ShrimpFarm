@@ -5,13 +5,17 @@ from __future__ import annotations
 from pathlib import Path
 
 import joblib
-import numpy as np
+import pandas as pd
 
-ML_DIR = Path(__file__).resolve().parent
+# =====================================
+# Paths
+# =====================================
 
-model = joblib.load(ML_DIR / "disease_model.pkl")
-water_encoder = joblib.load(ML_DIR / "water_encoder.pkl")
-disease_encoder = joblib.load(ML_DIR / "disease_encoder.pkl")
+DISEASE_DIR = Path(__file__).resolve().parent
+
+model = joblib.load(DISEASE_DIR / "model.pkl")
+water_encoder = joblib.load(DISEASE_DIR / "water_encoder.pkl")
+disease_encoder = joblib.load(DISEASE_DIR / "encoder.pkl")
 
 KNOWN_WATER_COLORS = list(getattr(water_encoder, "classes_", []))
 
@@ -43,17 +47,24 @@ DEFAULT_FEATURES = [
 
 def _normalize_water_color(water_color: str) -> str:
     raw = (water_color or "").strip()
+
     if not raw:
-        return "Light Green" if "Light Green" in KNOWN_WATER_COLORS else KNOWN_WATER_COLORS[0]
+        return (
+            "Light Green"
+            if "Light Green" in KNOWN_WATER_COLORS
+            else KNOWN_WATER_COLORS[0]
+        )
 
     if raw in KNOWN_WATER_COLORS:
         return raw
 
     alias = WATER_COLOR_ALIASES.get(raw.lower())
+
     if alias and alias in KNOWN_WATER_COLORS:
         return alias
 
     lower_map = {c.lower(): c for c in KNOWN_WATER_COLORS}
+
     if raw.lower() in lower_map:
         return lower_map[raw.lower()]
 
@@ -88,7 +99,12 @@ def predict_disease(
     }
 
     feature_names = list(getattr(model, "feature_names_in_", DEFAULT_FEATURES))
-    row = np.array([[values[name] for name in feature_names]], dtype=float)
+
+    # Create DataFrame with correct feature names
+    row = pd.DataFrame(
+        [[values[name] for name in feature_names]],
+        columns=feature_names,
+    )
 
     prediction = model.predict(row)[0]
     probability = float(model.predict_proba(row).max())
@@ -116,7 +132,7 @@ def predict_disease(
 
     return {
         "disease_risk": disease,
-        "confidence": float(round(probability * 100, 2)),
+        "confidence": round(probability * 100, 2),
         "recommendations": recommendations,
     }
 
@@ -130,4 +146,5 @@ if __name__ == "__main__":
         water_color="Dark Green",
         mortality_count=12,
     )
+
     print(result)

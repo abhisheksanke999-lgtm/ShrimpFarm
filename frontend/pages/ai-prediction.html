@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>AI Prediction - AquaControl</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  >
+
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+</head>
+
+<body class="bg-main">
+
+<div id="app"></div>
+
+<script src="../js/api.js"></script>
+<script src="../js/layout.js"></script>
+
+<script>
+
+(async () => {
+
+  // =====================================================
+  // AUTHENTICATION
+  // =====================================================
+
+  const user = await requireAuth();
+
+  if (!user) return;
+
+
+  // =====================================================
+  // LOAD DAILY OBSERVATIONS
+  // =====================================================
+
+  let dailyLogs = [];
+
+  try {
+
+    dailyLogs = await API.get("/api/daily");
+
+  } catch (error) {
+
+    console.error("Could not load daily observations:", error);
+
+    mountAppShell("ai-prediction", `
+      <div class="alert alert-danger">
+        Could not load daily observations.
+      </div>
+    `);
+
+    return;
+  }
+
+
+  // =====================================================
+  // CHECK DATA
+  // =====================================================
+
+  if (!dailyLogs || dailyLogs.length === 0) {
+
+    mountAppShell("ai-prediction", `
+
+      <div class="mb-4 pb-2 border-bottom">
+        <h4 class="fw-bold">AI Prediction</h4>
+
+        <p class="text-muted">
+          Generate feed, mortality, harvest and profit predictions.
+        </p>
+      </div>
+
+      <div class="card border-0 shadow-sm rounded-3 bg-white p-4">
+
+        <div class="alert alert-warning mb-0">
+
+          <h6 class="fw-bold">
+            No Daily Observation Found
+          </h6>
+
+          <p class="mb-3">
+            Please add a Daily Observation first.
+          </p>
+
+          <a href="daily.html" class="btn btn-primary">
+            <i class="fa-solid fa-plus me-1"></i>
+            Add Daily Observation
+          </a>
+
+        </div>
+
+      </div>
+
+    `);
+
+    return;
+  }
+
+
+  // =====================================================
+  // LATEST DAILY OBSERVATION
+  // =====================================================
+
+  const latest = dailyLogs[0];
+
+
+  // =====================================================
+  // GET LATEST DISEASE PREDICTION
+  // =====================================================
+
+  let dashboardData = null;
+
+  try {
+
+    dashboardData = await API.get("/api/dashboard");
+
+  } catch (error) {
+
+    console.error("Could not load dashboard prediction:", error);
+
+  }
+
+
+  const latestPrediction =
+    dashboardData?.latest_prediction || null;
+
+
+  // =====================================================
+  // DEFAULT VALUES
+  // =====================================================
+
+  const pondName =
+    latest.pond_name || "";
+
+  const predictionDate =
+    latest.log_date || "";
+
+  const temperature =
+    Number(latest.temperature || 0);
+
+  const ph =
+    Number(latest.ph || 0);
+
+  const salinity =
+    Number(latest.salinity || 0);
+
+  const dissolvedOxygen =
+    Number(latest.dissolved_oxygen || 0);
+
+  const previousMortality =
+    Number(latest.mortality_count || 0);
+
+  const waterQuality =
+    latestPrediction?.water_quality || "Moderate";
+
+  const diseaseRisk =
+    latestPrediction?.disease_risk || "Healthy";
+
+
+  // =====================================================
+  // PAGE
+  // =====================================================
+
+  mountAppShell("ai-prediction", `
+
+    <!-- ================================================= -->
+    <!-- PAGE HEADER -->
+    <!-- ================================================= -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom flex-wrap gap-2">
+
+      <div>
+
+        <h4 class="fw-bold mb-1">
+          AI Prediction
+        </h4>
+
+        <p class="text-muted small mb-0">
+          Generate intelligent predictions from your latest pond data.
+        </p>
+
+      </div>
+
+      <a
+        href="daily.html"
+        class="btn btn-sm btn-outline-primary"
+      >
+        <i class="fa-solid fa-water me-1"></i>
+        Daily Observation
+      </a>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- LATEST DAILY DATA -->
+    <!-- ================================================= -->
+
+    <div class="card border-0 shadow-sm rounded-3 bg-white p-4 mb-4">
+
+      <h5 class="fw-bold text-primary mb-3">
+        <i class="fa-solid fa-database me-2"></i>
+        Latest Daily Data
+      </h5>
+
+      <div class="row g-3">
+
+        <!-- POND -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            Pond
+          </label>
+
+          <input
+            id="pond_name"
+            class="form-control"
+            value="${escapeHtml(pondName)}"
+            readonly
+          >
+
+        </div>
+
+
+        <!-- DATE -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            Prediction Date
+          </label>
+
+          <input
+            id="prediction_date"
+            type="date"
+            class="form-control"
+            value="${escapeHtml(predictionDate)}"
+            readonly
+          >
+
+        </div>
+
+
+        <!-- TEMPERATURE -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            Temperature (°C)
+          </label>
+
+          <input
+            id="temperature"
+            type="number"
+            class="form-control"
+            value="${temperature}"
+            readonly
+          >
+
+        </div>
+
+
+        <!-- PH -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            pH
+          </label>
+
+          <input
+            id="ph"
+            type="number"
+            step="0.01"
+            class="form-control"
+            value="${ph}"
+            readonly
+          >
+
+        </div>
+
+
+        <!-- SALINITY -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            Salinity
+          </label>
+
+          <input
+            id="salinity"
+            type="number"
+            step="0.01"
+            class="form-control"
+            value="${salinity}"
+            readonly
+          >
+
+        </div>
+
+
+        <!-- DO -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            Dissolved Oxygen
+          </label>
+
+          <input
+            id="dissolved_oxygen"
+            type="number"
+            step="0.01"
+            class="form-control"
+            value="${dissolvedOxygen}"
+            readonly
+          >
+
+        </div>
+
+
+        <!-- WATER QUALITY -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            Water Quality
+          </label>
+
+          <input
+            id="water_quality"
+            class="form-control"
+            value="${escapeHtml(waterQuality)}"
+            readonly
+          >
+
+        </div>
+
+
+        <!-- DISEASE -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            Disease Risk
+          </label>
+
+          <input
+            id="disease_risk"
+            class="form-control"
+            value="${escapeHtml(diseaseRisk)}"
+            readonly
+          >
+
+        </div>
+
+
+        <!-- PREVIOUS MORTALITY -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            Previous Mortality
+          </label>
+
+          <input
+            id="previous_mortality"
+            type="number"
+            class="form-control"
+            value="${previousMortality}"
+            readonly
+          >
+
+        </div>
+
+      </div>
+
+      <div class="alert alert-info mt-4 mb-0">
+
+        <i class="fa-solid fa-circle-info me-2"></i>
+
+        These values are automatically taken from your
+        latest Daily Observation.
+
+      </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- ADDITIONAL AI INPUTS -->
+    <!-- ================================================= -->
+
+    <div class="card border-0 shadow-sm rounded-3 bg-white p-4 mb-4">
+
+      <h5 class="fw-bold text-primary mb-3">
+        <i class="fa-solid fa-sliders me-2"></i>
+        Additional Farm Data
+      </h5>
+
+      <p class="text-muted small">
+        Enter the remaining farm information required by the
+        prediction models.
+      </p>
+
+
+      <div class="row g-3">
+
+
+        <!-- DOC -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            DOC (Days of Culture)
+          </label>
+
+          <input
+            id="doc"
+            type="number"
+            min="0"
+            class="form-control"
+            placeholder="Example: 65"
+          >
+
+        </div>
+
+
+        <!-- AVG WEIGHT -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            Average Weight (g)
+          </label>
+
+          <input
+            id="avg_weight"
+            type="number"
+            min="0"
+            step="0.01"
+            class="form-control"
+            placeholder="Example: 18"
+          >
+
+        </div>
+
+
+        <!-- BIOMASS -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            Biomass (kg)
+          </label>
+
+          <input
+            id="biomass"
+            type="number"
+            min="0"
+            step="0.01"
+            class="form-control"
+            placeholder="Example: 4200"
+          >
+
+        </div>
+
+
+        <!-- YESTERDAY FEED -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            Yesterday Feed (kg)
+          </label>
+
+          <input
+            id="yesterday_feed"
+            type="number"
+            min="0"
+            step="0.01"
+            class="form-control"
+            placeholder="Example: 180"
+          >
+
+        </div>
+
+
+        <!-- SURVIVAL -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            Survival Rate (%)
+          </label>
+
+          <input
+            id="survival_rate"
+            type="number"
+            min="0"
+            max="100"
+            step="0.01"
+            class="form-control"
+            placeholder="Example: 90"
+          >
+
+        </div>
+
+
+        <!-- FCR -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            FCR
+          </label>
+
+          <input
+            id="fcr"
+            type="number"
+            min="0"
+            step="0.01"
+            class="form-control"
+            placeholder="Example: 1.4"
+          >
+
+        </div>
+
+
+        <!-- MARKET PRICE -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            Market Price (₹/kg)
+          </label>
+
+          <input
+            id="market_price"
+            type="number"
+            min="0"
+            step="0.01"
+            class="form-control"
+            placeholder="Example: 420"
+          >
+
+        </div>
+
+
+        <!-- FEED COST -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            Feed Cost (₹)
+          </label>
+
+          <input
+            id="feed_cost"
+            type="number"
+            min="0"
+            step="0.01"
+            class="form-control"
+            placeholder="Example: 180000"
+          >
+
+        </div>
+
+
+        <!-- SEED COST -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            Seed Cost (₹)
+          </label>
+
+          <input
+            id="seed_cost"
+            type="number"
+            min="0"
+            step="0.01"
+            class="form-control"
+            placeholder="Example: 70000"
+          >
+
+        </div>
+
+
+        <!-- MEDICINE -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            Medicine Cost (₹)
+          </label>
+
+          <input
+            id="medicine_cost"
+            type="number"
+            min="0"
+            step="0.01"
+            class="form-control"
+            placeholder="Example: 15000"
+          >
+
+        </div>
+
+
+        <!-- ELECTRICITY -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            Electricity Cost (₹)
+          </label>
+
+          <input
+            id="electricity_cost"
+            type="number"
+            min="0"
+            step="0.01"
+            class="form-control"
+            placeholder="Example: 25000"
+          >
+
+        </div>
+
+
+        <!-- LABOUR -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            Labour Cost (₹)
+          </label>
+
+          <input
+            id="labour_cost"
+            type="number"
+            min="0"
+            step="0.01"
+            class="form-control"
+            placeholder="Example: 30000"
+          >
+
+        </div>
+
+
+        <!-- OTHER -->
+
+        <div class="col-12 col-md-4">
+
+          <label class="form-label fw-semibold">
+            Other Expenses (₹)
+          </label>
+
+          <input
+            id="other_expenses"
+            type="number"
+            min="0"
+            step="0.01"
+            class="form-control"
+            placeholder="Example: 12000"
+          >
+
+        </div>
+
+      </div>
+
+
+      <!-- BUTTON -->
+
+      <div class="mt-4">
+
+        <button
+          id="predictBtn"
+          class="btn btn-primary px-4"
+        >
+
+          <i class="fa-solid fa-wand-magic-sparkles me-2"></i>
+
+          Generate AI Predictions
+
+        </button>
+
+      </div>
+
+
+      <div
+        id="errorBox"
+        class="alert alert-danger mt-3 d-none"
+      ></div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- RESULTS -->
+    <!-- ================================================= -->
+
+    <div
+      id="resultsSection"
+      class="d-none"
+    >
+
+
+      <!-- FEED -->
+
+      <div class="card border-0 shadow-sm rounded-3 bg-white p-4 mb-4">
+
+        <h5 class="fw-bold text-success mb-3">
+          🌾 Feed Prediction
+        </h5>
+
+        <div class="row g-3">
+
+          <div class="col-md-6">
+
+            <div class="p-4 rounded-3 bg-light">
+
+              <small class="text-muted">
+                Recommended Feed
+              </small>
+
+              <h2
+                id="feedResult"
+                class="fw-bold text-success mb-0"
+              >
+                -
+              </h2>
+
+              <span class="text-muted">
+                kg
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="col-md-6">
+
+            <div class="p-4 rounded-3 bg-light">
+
+              <small class="text-muted">
+                Recommendation
+              </small>
+
+              <h6
+                id="feedMessage"
+                class="fw-bold mb-0"
+              >
+                -
+              </h6>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- MORTALITY -->
+
+      <div class="card border-0 shadow-sm rounded-3 bg-white p-4 mb-4">
+
+        <h5 class="fw-bold text-danger mb-3">
+          🦐 Mortality Prediction
+        </h5>
+
+        <div class="p-4 rounded-3 bg-light">
+
+          <small class="text-muted">
+            Mortality Risk
+          </small>
+
+          <h3
+            id="mortalityResult"
+            class="fw-bold mb-3"
+          >
+            -
+          </h3>
+
+          <h6 class="fw-bold">
+            Recommendations
+          </h6>
+
+          <ul id="mortalityRecommendations">
+          </ul>
+
+        </div>
+
+      </div>
+
+
+      <!-- HARVEST -->
+
+      <div class="card border-0 shadow-sm rounded-3 bg-white p-4 mb-4">
+
+        <h5 class="fw-bold text-primary mb-3">
+          ⚖️ Harvest Prediction
+        </h5>
+
+        <div class="p-4 rounded-3 bg-light">
+
+          <small class="text-muted">
+            Expected Harvest Weight
+          </small>
+
+          <h2
+            id="harvestResult"
+            class="fw-bold text-primary mb-0"
+          >
+            -
+          </h2>
+
+          <span
+            id="harvestUnit"
+            class="text-muted"
+          >
+            kg
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- PROFIT -->
+
+      <div class="card border-0 shadow-sm rounded-3 bg-white p-4 mb-4">
+
+        <h5 class="fw-bold text-warning mb-3">
+          💰 Profit Prediction
+        </h5>
+
+        <div class="p-4 rounded-3 bg-light">
+
+          <small class="text-muted">
+            Expected Profit
+          </small>
+
+          <h2
+            id="profitResult"
+            class="fw-bold text-success mb-0"
+          >
+            -
+          </h2>
+
+          <span
+            id="profitCurrency"
+            class="text-muted"
+          >
+            INR
+          </span>
+
+        </div>
+
+      </div>
+
+
+    </div>
+
+  `);
+
+
+  // =====================================================
+  // GENERATE PREDICTION
+  // =====================================================
+
+  document
+    .getElementById("predictBtn")
+    .addEventListener("click", async () => {
+
+      const errorBox =
+        document.getElementById("errorBox");
+
+      const button =
+        document.getElementById("predictBtn");
+
+      errorBox.classList.add("d-none");
+
+
+      // ---------------------------------------------------
+      // READ VALUES
+      // ---------------------------------------------------
+
+      const payload = {
+
+        pond_name:
+          document.getElementById("pond_name").value,
+
+        prediction_date:
+          document.getElementById("prediction_date").value,
+
+        doc:
+          Number(document.getElementById("doc").value || 0),
+
+        avg_weight:
+          Number(document.getElementById("avg_weight").value || 0),
+
+        biomass:
+          Number(document.getElementById("biomass").value || 0),
+
+        temperature:
+          Number(document.getElementById("temperature").value || 0),
+
+        dissolved_oxygen:
+          Number(
+            document.getElementById("dissolved_oxygen").value || 0
+          ),
+
+        water_quality:
+          document.getElementById("water_quality").value,
+
+        disease_risk:
+          document.getElementById("disease_risk").value,
+
+        yesterday_feed:
+          Number(
+            document.getElementById("yesterday_feed").value || 0
+          ),
+
+        ph:
+          Number(document.getElementById("ph").value || 0),
+
+        salinity:
+          Number(document.getElementById("salinity").value || 0),
+
+        previous_mortality:
+          Number(
+            document.getElementById("previous_mortality").value || 0
+          ),
+
+        survival_rate:
+          Number(
+            document.getElementById("survival_rate").value || 0
+          ),
+
+        fcr:
+          Number(document.getElementById("fcr").value || 0),
+
+        market_price:
+          Number(
+            document.getElementById("market_price").value || 0
+          ),
+
+        feed_cost:
+          Number(
+            document.getElementById("feed_cost").value || 0
+          ),
+
+        seed_cost:
+          Number(
+            document.getElementById("seed_cost").value || 0
+          ),
+
+        medicine_cost:
+          Number(
+            document.getElementById("medicine_cost").value || 0
+          ),
+
+        electricity_cost:
+          Number(
+            document.getElementById("electricity_cost").value || 0
+          ),
+
+        labour_cost:
+          Number(
+            document.getElementById("labour_cost").value || 0
+          ),
+
+        other_expenses:
+          Number(
+            document.getElementById("other_expenses").value || 0
+          )
+
+      };
+
+
+      // ---------------------------------------------------
+      // BASIC VALIDATION
+      // ---------------------------------------------------
+
+      if (!payload.pond_name) {
+
+        errorBox.textContent =
+          "Pond name is missing. Add a Daily Observation first.";
+
+        errorBox.classList.remove("d-none");
+
+        return;
+      }
+
+
+      // ---------------------------------------------------
+      // LOADING
+      // ---------------------------------------------------
+
+      button.disabled = true;
+
+      button.innerHTML = `
+        <span
+          class="spinner-border spinner-border-sm me-2"
+        ></span>
+        Generating Predictions...
+      `;
+
+
+      try {
+
+        // -------------------------------------------------
+        // CALL BACKEND
+        // -------------------------------------------------
+
+        const result =
+          await API.post(
+            "/api/ml/predict-all",
+            payload
+          );
+
+
+        console.log(
+          "AI Prediction Result:",
+          result
+        );
+
+
+        // -------------------------------------------------
+        // FEED
+        // -------------------------------------------------
+
+        if (result.feed) {
+
+          document.getElementById("feedResult")
+            .textContent =
+            Number(
+              result.feed.recommended_feed || 0
+            ).toFixed(2);
+
+          document.getElementById("feedMessage")
+            .textContent =
+            result.feed.message || "Continue normal feeding.";
+
+        }
+
+
+        // -------------------------------------------------
+        // MORTALITY
+        // -------------------------------------------------
+
+        if (result.mortality) {
+
+          document.getElementById("mortalityResult")
+            .textContent =
+            result.mortality.mortality_risk || "N/A";
+
+
+          const recommendations =
+            result.mortality.recommendations || [];
+
+
+          document.getElementById(
+            "mortalityRecommendations"
+          ).innerHTML =
+            recommendations.length
+
+              ? recommendations
+                  .map(
+                    item =>
+                      `<li>${escapeHtml(item)}</li>`
+                  )
+                  .join("")
+
+              : "<li>No recommendations.</li>";
+
+        }
+
+
+        // -------------------------------------------------
+        // HARVEST
+        // -------------------------------------------------
+
+        if (result.harvest) {
+
+          document.getElementById("harvestResult")
+            .textContent =
+            Number(
+              result.harvest.expected_harvest_weight || 0
+            ).toFixed(2);
+
+          document.getElementById("harvestUnit")
+            .textContent =
+            result.harvest.unit || "kg";
+
+        }
+
+
+        // -------------------------------------------------
+        // PROFIT
+        // -------------------------------------------------
+
+        if (result.profit) {
+
+          document.getElementById("profitResult")
+            .textContent =
+            "₹" +
+            Number(
+              result.profit.expected_profit || 0
+            ).toLocaleString("en-IN", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            });
+
+          document.getElementById("profitCurrency")
+            .textContent =
+            result.profit.currency || "INR";
+
+        }
+
+
+        // -------------------------------------------------
+        // SHOW RESULTS
+        // -------------------------------------------------
+
+        document
+          .getElementById("resultsSection")
+          .classList.remove("d-none");
+
+
+        // Scroll to results
+
+        document
+          .getElementById("resultsSection")
+          .scrollIntoView({
+            behavior: "smooth"
+          });
+
+
+      } catch (error) {
+
+        console.error(
+          "AI prediction error:",
+          error
+        );
+
+
+        errorBox.textContent =
+          error?.message ||
+          "Prediction failed. Please check the backend.";
+
+        errorBox.classList.remove("d-none");
+
+      } finally {
+
+        button.disabled = false;
+
+        button.innerHTML = `
+          <i class="fa-solid fa-wand-magic-sparkles me-2"></i>
+          Generate AI Predictions
+        `;
+
+      }
+
+    });
+
+})();
+
+</script>
+
+</body>
+</html>

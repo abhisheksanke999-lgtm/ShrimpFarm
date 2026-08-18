@@ -1,135 +1,738 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Dashboard - AquaControl</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet">
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/components.css">
 </head>
+
 <body class="bg-main">
+
   <div id="app"></div>
+
   <script src="../js/api.js"></script>
   <script src="../js/layout.js"></script>
+
   <script>
+
     (async () => {
+
+      // =====================================================
+      // AUTHENTICATION
+      // =====================================================
+
       const user = await requireAuth();
+
       if (!user) return;
+
+
+      // =====================================================
+      // LOAD DASHBOARD DATA
+      // =====================================================
+
       const data = await API.get("/api/dashboard");
 
+
+      // Latest AI prediction
+      const prediction = data.latest_prediction;
+
+
+      // =====================================================
+      // RECENT OBSERVATION ROWS
+      // =====================================================
+
       const obsRows = data.recent_obs.length
+
         ? data.recent_obs.map((obs) => `
+
             <tr>
-              <td class="fw-bold text-primary">${escapeHtml(obs.pond_name)}</td>
-              <td>${escapeHtml(obs.log_date)}</td>
-              <td>${escapeHtml(obs.temperature)} °C</td>
-              <td>${escapeHtml(obs.ph)}</td>
-              <td>${escapeHtml(obs.dissolved_oxygen)}</td>
-              <td><span class="badge bg-light text-dark border">${escapeHtml(obs.water_color)}</span></td>
-            </tr>`).join("")
-        : `<tr><td colspan="6" class="text-center text-muted py-3">No daily logs yet. Add one from Daily Observation.</td></tr>`;
+
+              <td class="fw-bold text-primary">
+                ${escapeHtml(obs.pond_name)}
+              </td>
+
+              <td>
+                ${escapeHtml(obs.log_date)}
+              </td>
+
+              <td>
+                ${escapeHtml(obs.temperature)} °C
+              </td>
+
+              <td>
+                ${escapeHtml(obs.ph)}
+              </td>
+
+              <td>
+                ${escapeHtml(obs.dissolved_oxygen)}
+              </td>
+
+              <td>
+                <span class="badge bg-light text-dark border">
+                  ${escapeHtml(obs.water_color)}
+                </span>
+              </td>
+
+            </tr>
+
+          `).join("")
+
+        : `
+
+            <tr>
+
+              <td
+                colspan="6"
+                class="text-center text-muted py-3"
+              >
+                No daily logs yet.
+                Add one from Daily Observation.
+              </td>
+
+            </tr>
+
+          `;
+
+
+      // =====================================================
+      // POND LIST
+      // =====================================================
 
       const pondList = data.ponds_list.length
+
         ? data.ponds_list.map((pond) => `
-            <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+
+            <div
+              class="list-group-item px-0 d-flex justify-content-between align-items-center"
+            >
+
               <div>
-                <div class="fw-bold text-dark mb-0">${escapeHtml(pond.name)}</div>
-                <small class="text-muted">Area: ${escapeHtml(pond.area_sqm)} (acres) | Depth: ${escapeHtml(pond.depth_m)} feets</small>
+
+                <div class="fw-bold text-dark mb-0">
+                  ${escapeHtml(pond.name)}
+                </div>
+
+                <small class="text-muted">
+
+                  Area:
+                  ${escapeHtml(pond.area_sqm)}
+                  (acres)
+
+                  |
+
+                  Depth:
+                  ${escapeHtml(pond.depth_m)}
+                  feets
+
+                </small>
+
               </div>
-              <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">${escapeHtml(pond.status)}</span>
-            </div>`).join("")
-        : `<div class="text-muted text-center py-3">No ponds yet. Add one from Ponds.</div>`;
+
+
+              <span
+                class="badge bg-success-subtle text-success border border-success-subtle rounded-pill"
+              >
+
+                ${escapeHtml(pond.status)}
+
+              </span>
+
+            </div>
+
+          `).join("")
+
+        : `
+
+            <div class="text-muted text-center py-3">
+
+              No ponds yet.
+              Add one from Ponds.
+
+            </div>
+
+          `;
+
+
+      // =====================================================
+      // AI PREDICTION CONTENT
+      // =====================================================
+
+      const aiPredictionContent = prediction
+
+        ? `
+
+            <div class="row g-3">
+
+              <!-- Pond -->
+
+              <div class="col-12 col-md-3">
+
+                <div class="p-3 rounded-3 bg-light h-100">
+
+                  <small class="text-muted">
+                    Pond
+                  </small>
+
+                  <h6 class="fw-bold mb-0 mt-1">
+
+                    ${escapeHtml(prediction.pond_name)}
+
+                  </h6>
+
+                </div>
+
+              </div>
+
+
+              <!-- Water Quality -->
+
+              <div class="col-12 col-md-3">
+
+                <div class="p-3 rounded-3 bg-light h-100">
+
+                  <small class="text-muted">
+                    Water Quality
+                  </small>
+
+                  <h6 class="fw-bold mb-0 mt-1">
+
+                    ${escapeHtml(
+                      prediction.water_quality || "N/A"
+                    )}
+
+                  </h6>
+
+                </div>
+
+              </div>
+
+
+              <!-- Disease Risk -->
+
+              <div class="col-12 col-md-3">
+
+                <div class="p-3 rounded-3 bg-light h-100">
+
+                  <small class="text-muted">
+                    Disease Risk
+                  </small>
+
+                  <h6 class="fw-bold mb-0 mt-1">
+
+                    ${
+                      prediction.disease_risk === "Healthy"
+
+                        ? "🟢 Healthy"
+
+                        : prediction.disease_risk === "Moderate"
+
+                        ? "🟡 Moderate"
+
+                        : "🔴 High Risk"
+                    }
+
+                  </h6>
+
+                </div>
+
+              </div>
+
+
+              <!-- Confidence -->
+
+              <div class="col-12 col-md-3">
+
+                <div class="p-3 rounded-3 bg-light h-100">
+
+                  <small class="text-muted">
+                    Confidence
+                  </small>
+
+                  <h6 class="fw-bold mb-0 mt-1">
+
+                    ${
+                      prediction.disease_confidence ?? 0
+                    }%
+
+                  </h6>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <hr>
+
+
+            <!-- Recommendations -->
+
+            <h6 class="fw-bold mb-2">
+              AI Recommendations
+            </h6>
+
+
+            <ul class="mb-0">
+
+              ${
+                prediction.alerts
+
+                  ? prediction.alerts
+                      .split("\n")
+                      .filter(a => a.trim() !== "")
+                      .map(
+                        a =>
+                          `<li>${escapeHtml(a)}</li>`
+                      )
+                      .join("")
+
+                  : "<li>No recommendations available.</li>"
+              }
+
+            </ul>
+
+          `
+
+        : `
+
+            <div class="text-muted">
+
+              No AI prediction available yet.
+
+              <br>
+
+              Add a daily observation to generate
+              an AI prediction.
+
+            </div>
+
+          `;
+
+
+      // =====================================================
+      // BUILD DASHBOARD
+      // =====================================================
 
       mountAppShell("dashboard", `
-        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom flex-wrap gap-2">
+
+
+        <!-- ================================================= -->
+        <!-- FARM OVERVIEW -->
+        <!-- ================================================= -->
+
+        <div
+          class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom flex-wrap gap-2"
+        >
+
           <div>
-            <h4 class="fw-bold mb-1">Farm Overview</h4>
-            <p class="text-muted small mb-0">Welcome back, <strong>${escapeHtml(data.user_name)}</strong>!</p>
+
+            <h4 class="fw-bold mb-1">
+              Farm Overview
+            </h4>
+
+            <p class="text-muted small mb-0">
+
+              Welcome back,
+              <strong>
+                ${escapeHtml(data.user_name)}
+              </strong>!
+
+            </p>
+
           </div>
+
+
           <div class="d-flex gap-2">
-            <a href="daily.html" class="btn btn-sm btn-primary"><i class="fa-solid fa-plus me-1"></i> Add Daily Log</a>
-            <a href="pond.html" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-plus me-1"></i> Add Pond</a>
+
+            <a
+              href="daily.html"
+              class="btn btn-sm btn-primary"
+            >
+
+              <i class="fa-solid fa-plus me-1"></i>
+
+              Add Daily Log
+
+            </a>
+
+
+            <a
+              href="pond.html"
+              class="btn btn-sm btn-outline-primary"
+            >
+
+              <i class="fa-solid fa-plus me-1"></i>
+
+              Add Pond
+
+            </a>
+
           </div>
+
         </div>
+
+
+        <!-- ================================================= -->
+        <!-- ORIGINAL STATISTICS CARDS -->
+        <!-- ================================================= -->
 
         <div class="row g-3 mb-4">
+
+
+          <!-- Active Ponds -->
+
           <div class="col-12 col-sm-6 col-lg-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white">
-              <div class="d-flex justify-content-between align-items-center">
+
+            <div
+              class="card border-0 shadow-sm rounded-3 p-3 bg-white"
+            >
+
+              <div
+                class="d-flex justify-content-between align-items-center"
+              >
+
                 <div>
-                  <div class="text-muted small fw-semibold">Active Ponds</div>
-                  <h3 class="fw-bold mb-0 text-primary">${data.active_ponds} <span class="fs-6 text-muted">/ ${data.total_ponds}</span></h3>
+
+                  <div class="text-muted small fw-semibold">
+                    Active Ponds
+                  </div>
+
+                  <h3 class="fw-bold mb-0 text-primary">
+
+                    ${data.active_ponds}
+
+                    <span class="fs-6 text-muted">
+                      / ${data.total_ponds}
+                    </span>
+
+                  </h3>
+
                 </div>
-                <div class="bg-primary-subtle text-primary p-3 rounded-circle fs-4"><i class="fa-solid fa-water"></i></div>
+
+
+                <div
+                  class="bg-primary-subtle text-primary p-3 rounded-circle fs-4"
+                >
+
+                  <i class="fa-solid fa-water"></i>
+
+                </div>
+
               </div>
+
             </div>
+
           </div>
+
+
+          <!-- Total Feed -->
+
           <div class="col-12 col-sm-6 col-lg-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white">
-              <div class="d-flex justify-content-between align-items-center">
+
+            <div
+              class="card border-0 shadow-sm rounded-3 p-3 bg-white"
+            >
+
+              <div
+                class="d-flex justify-content-between align-items-center"
+              >
+
                 <div>
-                  <div class="text-muted small fw-semibold">Total Feed Used</div>
-                  <h3 class="fw-bold mb-0 text-success">${Number(data.total_feed_kg).toFixed(1)} <span class="fs-6 text-muted">kg</span></h3>
+
+                  <div class="text-muted small fw-semibold">
+                    Total Feed Used
+                  </div>
+
+                  <h3 class="fw-bold mb-0 text-success">
+
+                    ${Number(data.total_feed_kg).toFixed(1)}
+
+                    <span class="fs-6 text-muted">
+                      kg
+                    </span>
+
+                  </h3>
+
                 </div>
-                <div class="bg-success-subtle text-success p-3 rounded-circle fs-4"><i class="fa-solid fa-wheat-awn"></i></div>
+
+
+                <div
+                  class="bg-success-subtle text-success p-3 rounded-circle fs-4"
+                >
+
+                  <i class="fa-solid fa-wheat-awn"></i>
+
+                </div>
+
               </div>
+
             </div>
+
           </div>
+
+
+          <!-- Total Expenses -->
+
           <div class="col-12 col-sm-6 col-lg-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white">
-              <div class="d-flex justify-content-between align-items-center">
+
+            <div
+              class="card border-0 shadow-sm rounded-3 p-3 bg-white"
+            >
+
+              <div
+                class="d-flex justify-content-between align-items-center"
+              >
+
                 <div>
-                  <div class="text-muted small fw-semibold">Total Expenses</div>
-                  <h3 class="fw-bold mb-0 text-danger">Rs.${Number(data.total_expenses).toFixed(2)}</h3>
+
+                  <div class="text-muted small fw-semibold">
+                    Total Expenses
+                  </div>
+
+                  <h3 class="fw-bold mb-0 text-danger">
+
+                    Rs.${Number(
+                      data.total_expenses
+                    ).toFixed(2)}
+
+                  </h3>
+
                 </div>
-                <div class="bg-danger-subtle text-danger p-3 rounded-circle fs-4"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+
+
+                <div
+                  class="bg-danger-subtle text-danger p-3 rounded-circle fs-4"
+                >
+
+                  <i class="fa-solid fa-indian-rupee-sign"></i>
+
+                </div>
+
               </div>
+
             </div>
+
           </div>
+
+
+          <!-- Recent Logs -->
+
           <div class="col-12 col-sm-6 col-lg-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white">
-              <div class="d-flex justify-content-between align-items-center">
+
+            <div
+              class="card border-0 shadow-sm rounded-3 p-3 bg-white"
+            >
+
+              <div
+                class="d-flex justify-content-between align-items-center"
+              >
+
                 <div>
-                  <div class="text-muted small fw-semibold">Recent Logs Shown</div>
-                  <h3 class="fw-bold mb-0 text-info">${data.recent_obs.length}</h3>
+
+                  <div class="text-muted small fw-semibold">
+                    Recent Logs Shown
+                  </div>
+
+                  <h3 class="fw-bold mb-0 text-info">
+
+                    ${data.recent_obs.length}
+
+                  </h3>
+
                 </div>
-                <div class="bg-info-subtle text-info p-3 rounded-circle fs-4"><i class="fa-solid fa-clipboard-check"></i></div>
+
+
+                <div
+                  class="bg-info-subtle text-info p-3 rounded-circle fs-4"
+                >
+
+                  <i class="fa-solid fa-clipboard-check"></i>
+
+                </div>
+
               </div>
+
             </div>
+
           </div>
+
         </div>
 
-        <div class="row g-4">
-          <div class="col-12 col-lg-7">
-            <div class="card border-0 shadow-sm rounded-3 bg-white p-3">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="fw-bold mb-0 text-primary">Recent Daily Water & Health Logs</h6>
-                <a href="daily.html" class="btn btn-sm btn-link text-decoration-none">View All</a>
-              </div>
-              <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0 small">
-                  <thead class="table-light">
-                    <tr><th>Pond Name</th><th>Date</th><th>Temp (°C)</th><th>pH</th><th>DO (mg/L)</th><th>Water Color</th></tr>
-                  </thead>
-                  <tbody>${obsRows}</tbody>
-                </table>
-              </div>
+
+        <!-- ================================================= -->
+        <!-- LATEST AI PREDICTION -->
+        <!-- ================================================= -->
+
+        <div
+          class="card border-0 shadow-sm rounded-3 bg-white p-4 mb-4"
+        >
+
+          <div
+            class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2"
+          >
+
+            <div>
+
+              <h5 class="fw-bold text-primary mb-1">
+
+                🦐 Latest AI Prediction
+
+              </h5>
+
+              <small class="text-muted">
+
+                Based on your latest daily observation
+
+              </small>
+
             </div>
+
           </div>
-          <div class="col-12 col-lg-5">
-            <div class="card border-0 shadow-sm rounded-3 bg-white p-3">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="fw-bold mb-0 text-primary">Your Ponds</h6>
-                <a href="pond.html" class="btn btn-sm btn-link text-decoration-none">Manage Ponds</a>
-              </div>
-              <div class="list-group list-group-flush">${pondList}</div>
-            </div>
-          </div>
+
+
+          ${aiPredictionContent}
+
         </div>
+
+
+        <!-- ================================================= -->
+        <!-- RECENT LOGS + PONDS -->
+        <!-- ================================================= -->
+
+        <div class="row g-4">
+
+
+          <!-- Recent Logs -->
+
+          <div class="col-12 col-lg-7">
+
+            <div
+              class="card border-0 shadow-sm rounded-3 bg-white p-3"
+            >
+
+              <div
+                class="d-flex justify-content-between align-items-center mb-3"
+              >
+
+                <h6 class="fw-bold mb-0 text-primary">
+
+                  Recent Daily Water & Health Logs
+
+                </h6>
+
+
+                <a
+                  href="daily.html"
+                  class="btn btn-sm btn-link text-decoration-none"
+                >
+
+                  View All
+
+                </a>
+
+              </div>
+
+
+              <div class="table-responsive">
+
+                <table
+                  class="table table-hover align-middle mb-0 small"
+                >
+
+                  <thead class="table-light">
+
+                    <tr>
+
+                      <th>Pond Name</th>
+                      <th>Date</th>
+                      <th>Temp (°C)</th>
+                      <th>pH</th>
+                      <th>DO (mg/L)</th>
+                      <th>Water Color</th>
+
+                    </tr>
+
+                  </thead>
+
+
+                  <tbody>
+
+                    ${obsRows}
+
+                  </tbody>
+
+                </table>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- Your Ponds -->
+
+          <div class="col-12 col-lg-5">
+
+            <div
+              class="card border-0 shadow-sm rounded-3 bg-white p-3"
+            >
+
+              <div
+                class="d-flex justify-content-between align-items-center mb-3"
+              >
+
+                <h6 class="fw-bold mb-0 text-primary">
+
+                  Your Ponds
+
+                </h6>
+
+
+                <a
+                  href="pond.html"
+                  class="btn btn-sm btn-link text-decoration-none"
+                >
+
+                  Manage Ponds
+
+                </a>
+
+              </div>
+
+
+              <div class="list-group list-group-flush">
+
+                ${pondList}
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
       `);
+
     })();
+
   </script>
+
 </body>
+
 </html>

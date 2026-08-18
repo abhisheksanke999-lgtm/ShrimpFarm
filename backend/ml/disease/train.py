@@ -7,13 +7,19 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
-ML_DIR = Path(__file__).resolve().parent
+# ==============================
+# Paths
+# ==============================
+
+DISEASE_DIR = Path(__file__).resolve().parent
+ML_DIR = DISEASE_DIR.parent
+DATASET_PATH = ML_DIR / "dataset" / "shrimp_disease_dataset.csv"
 
 # ==============================
 # Load Dataset
 # ==============================
 
-df = pd.read_csv(ML_DIR / "dataset" / "shrimp_disease_dataset.csv")
+df = pd.read_csv(DATASET_PATH)
 
 print("Dataset Loaded Successfully!")
 print(df.head())
@@ -73,7 +79,7 @@ accuracy = accuracy_score(y_test, y_pred)
 print("\n==============================")
 print("MODEL ACCURACY")
 print("==============================")
-print(f"{accuracy*100:.2f}%")
+print(f"{accuracy * 100:.2f}%")
 
 print("\nClassification Report\n")
 print(classification_report(y_test, y_pred))
@@ -85,9 +91,9 @@ print(confusion_matrix(y_test, y_pred))
 # Save Model
 # ==============================
 
-joblib.dump(model, ML_DIR / "disease_model.pkl")
-joblib.dump(water_encoder, ML_DIR / "water_encoder.pkl")
-joblib.dump(disease_encoder, ML_DIR / "disease_encoder.pkl")
+joblib.dump(model, DISEASE_DIR / "model.pkl")
+joblib.dump(water_encoder, DISEASE_DIR / "water_encoder.pkl")
+joblib.dump(disease_encoder, DISEASE_DIR / "encoder.pkl")
 
 print("\nModel Saved Successfully!")
-print(f"Saved under: {ML_DIR}")
+print(f"Saved under: {DISEASE_DIR}")

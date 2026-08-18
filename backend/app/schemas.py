@@ -79,12 +79,18 @@ class PondOut(BaseModel):
 class DailyCreate(BaseModel):
     pond_name: str = Field(min_length=1)
     log_date: date
+
+    # Water Parameters
     temperature: float = 0
     ph: float = 0
     salinity: float = 0
     dissolved_oxygen: float = 0
     water_color: str = "Light Green"
+
+    # Disease
     mortality_count: int = 0
+
+    # Notes
     notes: str = ""
 
 
@@ -161,6 +167,22 @@ class HarvestOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class PredictionDashboardOut(BaseModel):
+    prediction_id: int
+    pond_name: str
+    prediction_date: date
+    water_quality: str | None = None
+    disease_risk: str | None = None
+    disease_confidence: float | None = None
+    recommended_feed: float | None = None
+    mortality_risk: str | None = None
+    expected_harvest_weight: float | None = None
+    expected_profit: float | None = None
+    alerts: str | None = None
+
+    model_config = {"from_attributes": True}
+
+
 class DashboardOut(BaseModel):
     user_name: str
     active_ponds: int
@@ -169,6 +191,8 @@ class DashboardOut(BaseModel):
     total_expenses: float
     recent_obs: list[DailyOut]
     ponds_list: list[PondOut]
+
+    latest_prediction: PredictionDashboardOut | None = None
 
 
 class ReportsOut(BaseModel):
@@ -236,3 +260,48 @@ class SeedStockingListOut(BaseModel):
     total_pl: int
     total_cost: float
     most_recent_date: date | None
+# ===========================
+# AI Prediction Schemas
+# ===========================
+
+class WaterPredictionOut(BaseModel):
+    water_quality: str
+
+
+class DiseasePredictionOut(BaseModel):
+    disease_risk: str
+    confidence: float
+    recommendations: list[str]
+
+
+class FeedPredictionOut(BaseModel):
+    recommended_feed: float
+
+
+class MortalityPredictionOut(BaseModel):
+    mortality_risk: str
+    recommendations: list[str]
+
+
+class HarvestPredictionOut(BaseModel):
+    expected_harvest_weight: float
+    unit: str
+
+
+class ProfitPredictionOut(BaseModel):
+    expected_profit: float
+    currency: str
+
+
+class SmartAlertOut(BaseModel):
+    alerts: list[str]
+
+
+class CompletePredictionResponse(BaseModel):
+    water: WaterPredictionOut | None = None
+    disease: DiseasePredictionOut
+    feed: FeedPredictionOut | None = None
+    mortality: MortalityPredictionOut | None = None
+    harvest: HarvestPredictionOut | None = None
+    profit: ProfitPredictionOut | None = None
+    alerts: list[str] = []

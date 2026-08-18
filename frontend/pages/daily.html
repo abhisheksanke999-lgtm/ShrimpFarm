@@ -111,6 +111,9 @@
                   <label class="form-label small fw-semibold">Mortality Count</label>
                   <input type="number" name="mortality_count" class="form-control" value="0">
                 </div>
+
+                <hr>
+
                 <div class="mb-3">
                   <label class="form-label small fw-semibold">Notes</label>
                   <input type="text" name="notes" class="form-control">
@@ -139,7 +142,7 @@
         e.preventDefault();
         const fd = new FormData(e.target);
         try {
-          const res = await API.post("/api/daily", {
+  const res = await API.post("/api/daily", {
     pond_name: fd.get("pond_name"),
     log_date: fd.get("log_date"),
     temperature: Number(fd.get("temperature") || 0),

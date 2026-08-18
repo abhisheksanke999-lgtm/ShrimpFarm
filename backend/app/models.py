@@ -79,22 +79,85 @@ class SeedStocking(Base):
 
     pond = relationship("Pond", back_populates="seed_stockings")
 
-
 class DailyObservation(Base):
     __tablename__ = "daily_observations"
 
     log_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
     pond_name: Mapped[str] = mapped_column(String(100), nullable=False)
+
     log_date: Mapped[date] = mapped_column(Date, nullable=False)
-    temperature: Mapped[Decimal | None] = mapped_column(Numeric(4, 2), nullable=True)
-    ph: Mapped[Decimal | None] = mapped_column(Numeric(4, 2), nullable=True)
-    salinity: Mapped[Decimal | None] = mapped_column(Numeric(4, 2), nullable=True)
-    dissolved_oxygen: Mapped[Decimal | None] = mapped_column(Numeric(4, 2), nullable=True)
-    water_color: Mapped[str | None] = mapped_column(String(50), nullable=True)
+
+    # ==========================
+    # Water Quality
+    # ==========================
+
+    temperature: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
+    ph: Mapped[Decimal | None] = mapped_column(Numeric(4, 2))
+    salinity: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
+    dissolved_oxygen: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
+    water_color: Mapped[str | None] = mapped_column(String(50))
+
+    # ==========================
+    # Disease
+    # ==========================
+
     mortality_count: Mapped[int] = mapped_column(Integer, default=0)
-    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    # ==========================
+    # Feed Prediction Inputs
+    # ==========================
+
+    doc: Mapped[int] = mapped_column(Integer, default=0)
+
+    avg_weight: Mapped[Decimal | None] = mapped_column(Numeric(8, 2))
+
+    biomass: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+
+    yesterday_feed: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
+
+    # ==========================
+    # Harvest Inputs
+    # ==========================
+
+    survival_rate: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
+
+    fcr: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
+
+    # ==========================
+    # Profit Inputs
+    # ==========================
+
+    market_price: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
+
+    feed_cost: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+
+    seed_cost: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+
+    medicine_cost: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+
+    electricity_cost: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+
+    labour_cost: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+
+    other_expenses: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+
+    # ==========================
+    # Notes
+    # ==========================
+
+    notes: Mapped[str | None] = mapped_column(Text)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+    )
 
 
 class FeedRecord(Base):
@@ -135,3 +198,55 @@ class HarvestRecord(Base):
     total_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     buyer_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PredictionRecord(Base):
+    __tablename__ = "prediction_records"
+
+    prediction_id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+        autoincrement=True,
+    )
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    pond_name: Mapped[str] = mapped_column(String(100), nullable=False)
+
+    prediction_date: Mapped[date] = mapped_column(
+        Date,
+        nullable=False,
+    )
+
+    water_quality: Mapped[str | None] = mapped_column(String(50))
+
+    disease_risk: Mapped[str | None] = mapped_column(String(50))
+
+    disease_confidence: Mapped[Decimal | None] = mapped_column(
+        Numeric(5, 2)
+    )
+
+    recommended_feed: Mapped[Decimal | None] = mapped_column(
+        Numeric(10, 2)
+    )
+
+    mortality_risk: Mapped[str | None] = mapped_column(String(50))
+
+    expected_harvest_weight: Mapped[Decimal | None] = mapped_column(
+        Numeric(12, 2)
+    )
+
+    expected_profit: Mapped[Decimal | None] = mapped_column(
+        Numeric(14, 2)
+    )
+
+    alerts: Mapped[str | None] = mapped_column(Text)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+    )
