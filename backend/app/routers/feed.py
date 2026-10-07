@@ -46,3 +46,21 @@ def create_feed(payload: FeedCreate, db: Session = Depends(get_db), user: User =
     db.add(row)
     db.commit()
     return {"message": "Feed record saved successfully!"}
+
+
+@router.delete("/{feed_id}", response_model=MessageOut)
+def delete_feed(
+    feed_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    row = (
+        db.query(FeedRecord)
+        .filter(FeedRecord.feed_id == feed_id, FeedRecord.user_id == user.id)
+        .first()
+    )
+    if not row:
+        raise HTTPException(status_code=404, detail="Feed record not found.")
+    db.delete(row)
+    db.commit()
+    return {"message": "Feed record deleted."}

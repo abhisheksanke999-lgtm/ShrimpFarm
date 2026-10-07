@@ -32,7 +32,6 @@ def create_access_token(user_id: int) -> str:
     payload = {"sub": str(user_id), "exp": expire}
     return jwt.encode(payload, settings.secret_key, algorithm=settings.algorithm)
 
-
 def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
     token = request.cookies.get(settings.cookie_name)
     if not token:

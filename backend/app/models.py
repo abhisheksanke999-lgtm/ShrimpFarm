@@ -76,7 +76,6 @@ class SeedStocking(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
-
     pond = relationship("Pond", back_populates="seed_stockings")
 
 class DailyObservation(Base):
@@ -91,7 +90,6 @@ class DailyObservation(Base):
     )
 
     pond_name: Mapped[str] = mapped_column(String(100), nullable=False)
-
     log_date: Mapped[date] = mapped_column(Date, nullable=False)
 
     # ==========================
@@ -127,7 +125,6 @@ class DailyObservation(Base):
     # ==========================
 
     survival_rate: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
-
     fcr: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
 
     # ==========================

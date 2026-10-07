@@ -27,8 +27,9 @@
               <td>${escapeHtml(e.category)}</td>
               <td>${escapeHtml(e.description)}</td>
               <td>Rs.${Number(e.amount).toFixed(2)}</td>
+              <td><button type="button" class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${e.expense_id}" title="Delete"><i class="fa-solid fa-trash"></i></button></td>
             </tr>`).join("")
-        : `<tr><td colspan="4" class="text-center text-muted py-3">No expenses yet.</td></tr>`;
+        : `<tr><td colspan="5" class="text-center text-muted py-3">No expenses yet.</td></tr>`;
 
       mountAppShell("expense", `
         <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom flex-wrap gap-2">
@@ -74,7 +75,7 @@
               <h6 class="fw-bold text-primary mb-3">All Expenses</h6>
               <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0 small">
-                  <thead class="table-light"><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th></tr></thead>
+                  <thead class="table-light"><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Delete</th></tr></thead>
                   <tbody>${rows}</tbody>
                 </table>
               </div>
@@ -93,6 +94,20 @@
             description: fd.get("description"),
             amount: Number(fd.get("amount")),
           });
+          await loadPage({ type: "success", msg: res.message });
+        } catch (err) {
+          await loadPage({ type: "danger", msg: err.message });
+        }
+      });
+
+      document.querySelector("table tbody")?.addEventListener("click", async (e) => {
+        const btn = e.target.closest("button[data-action='delete']");
+        if (!btn) return;
+        const expenseId = Number(btn.dataset.id);
+        if (!expenseId) return;
+        if (!confirm("Delete this expense record?")) return;
+        try {
+          const res = await API.delete(`/api/expenses/${expenseId}`);
           await loadPage({ type: "success", msg: res.message });
         } catch (err) {
           await loadPage({ type: "danger", msg: err.message });

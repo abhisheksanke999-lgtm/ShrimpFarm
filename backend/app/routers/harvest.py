@@ -57,3 +57,24 @@ def create_harvest(payload: HarvestCreate, db: Session = Depends(get_db), user: 
     pond.status = "Harvested"
     db.commit()
     return {"message": "Harvest saved! Pond marked as Harvested."}
+
+
+@router.delete("/{harvest_id}", response_model=MessageOut)
+def delete_harvest(
+    harvest_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    row = (
+        db.query(HarvestRecord)
+        .filter(
+            HarvestRecord.harvest_id == harvest_id,
+            HarvestRecord.user_id == user.id,
+        )
+        .first()
+    )
+    if not row:
+        raise HTTPException(status_code=404, detail="Harvest record not found.")
+    db.delete(row)
+    db.commit()
+    return {"message": "Harvest record deleted."}

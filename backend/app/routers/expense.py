@@ -42,3 +42,24 @@ def create_expense(payload: ExpenseCreate, db: Session = Depends(get_db), user: 
     db.add(row)
     db.commit()
     return {"message": "Expense saved successfully!"}
+
+
+@router.delete("/{expense_id}", response_model=MessageOut)
+def delete_expense(
+    expense_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    row = (
+        db.query(ExpenseRecord)
+        .filter(
+            ExpenseRecord.expense_id == expense_id,
+            ExpenseRecord.user_id == user.id,
+        )
+        .first()
+    )
+    if not row:
+        raise HTTPException(status_code=404, detail="Expense record not found.")
+    db.delete(row)
+    db.commit()
+    return {"message": "Expense record deleted."}

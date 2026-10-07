@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/components.css">
 </head>
+
 <body class="bg-main">
   <div id="app"></div>
   <script src="../js/api.js"></script>
@@ -27,8 +29,9 @@
               <td>${escapeHtml(p.depth_m)} feets</td>
               <td>${escapeHtml(p.water_source)}</td>
               <td><span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">${escapeHtml(p.status)}</span></td>
+              <td><button type="button" class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${p.pond_id}" title="Delete"><i class="fa-solid fa-trash"></i></button></td>
             </tr>`).join("")
-        : `<tr><td colspan="6" class="text-center text-muted py-3">No ponds yet. Add one using the form.</td></tr>`;
+        : `<tr><td colspan="7" class="text-center text-muted py-3">No ponds yet. Add one using the form.</td></tr>`;
 
       mountAppShell("pond", `
         <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
@@ -81,7 +84,7 @@
               <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0 small">
                   <thead class="table-light">
-                    <tr><th>#ID</th><th>Pond Name</th><th>Area (Acres)</th><th>Depth (feet)</th><th>Water Source</th><th>Status</th></tr>
+                    <tr><th>#ID</th><th>Pond Name</th><th>Area (Acres)</th><th>Depth (feet)</th><th>Water Source</th><th>Status</th><th>Delete</th></tr>
                   </thead>
                   <tbody>${rows}</tbody>
                 </table>
@@ -107,8 +110,23 @@
           await loadPage({ type: "danger", msg: err.message });
         }
       });
+
+      document.querySelector("table tbody")?.addEventListener("click", async (e) => {
+        const btn = e.target.closest("button[data-action='delete']");
+        if (!btn) return;
+        const pondId = Number(btn.dataset.id);
+        if (!pondId) return;
+        if (!confirm("Delete this pond? Linked seed stocking for this pond will also be removed.")) return;
+        try {
+          const res = await API.delete(`/api/ponds/${pondId}`);
+          await loadPage({ type: "success", msg: res.message });
+        } catch (err) {
+          await loadPage({ type: "danger", msg: err.message });
+        }
+      });
     }
     loadPage();
   </script>
 </body>
+
 </html>

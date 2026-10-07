@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.auth import get_current_user
 from app.database import get_db
 from app.models import DailyObservation, Pond, PredictionRecord, User
-from app.schemas import DailyCreate, DailyOut, DailyPredictionResponse
+from app.schemas import DailyCreate, DailyOut, DailyPredictionResponse, MessageOut
 
 from ml.disease.predict import predict_disease
 
@@ -238,3 +238,33 @@ def create_daily(
         "message": "Daily log saved successfully!",
         "prediction": disease_prediction,
     }
+
+
+@router.delete("/{log_id}", response_model=MessageOut)
+def delete_daily(
+    log_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    row = (
+        db.query(DailyObservation)
+        .filter(
+            DailyObservation.log_id == log_id,
+            DailyObservation.user_id == user.id,
+        )
+        .first()
+    )
+    if not row:
+        raise HTTPException(status_code=404, detail="Daily observation not found.")
+
+    db.query(PredictionRecord).filter(
+        PredictionRecord.user_id == user.id,
+        PredictionRecord.pond_name == row.pond_name,
+        PredictionRecord.prediction_date == row.log_date,
+        PredictionRecord.recommended_feed.is_(None),
+        PredictionRecord.mortality_risk.is_(None),
+    ).delete(synchronize_session=False)
+
+    db.delete(row)
+    db.commit()
+    return {"message": "Daily observation deleted."}

@@ -32,8 +32,9 @@
               <td>${escapeHtml(r.quantity_kg)} kg</td>
               <td>${escapeHtml(r.feed_size || "-")}</td>
               <td>${escapeHtml(r.feeding_time || "-")}</td>
+              <td><button type="button" class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${r.feed_id}" title="Delete"><i class="fa-solid fa-trash"></i></button></td>
             </tr>`).join("")
-        : `<tr><td colspan="6" class="text-center text-muted py-3">No feed records yet.</td></tr>`;
+        : `<tr><td colspan="7" class="text-center text-muted py-3">No feed records yet.</td></tr>`;
 
       mountAppShell("feed", `
         <div class="mb-4 pb-2 border-bottom">
@@ -86,7 +87,7 @@
               <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0 small">
                   <thead class="table-light">
-                    <tr><th>Pond</th><th>Date</th><th>Brand</th><th>Qty</th><th>Size</th><th>Time</th></tr>
+                    <tr><th>Pond</th><th>Date</th><th>Brand</th><th>Qty</th><th>Size</th><th>Time</th><th>Delete</th></tr>
                   </thead>
                   <tbody>${rows}</tbody>
                 </table>
@@ -108,6 +109,20 @@
             entry_date: fd.get("entry_date"),
             feed_size: fd.get("feed_size") || "",
           });
+          await loadPage({ type: "success", msg: res.message });
+        } catch (err) {
+          await loadPage({ type: "danger", msg: err.message });
+        }
+      });
+
+      document.querySelector("table tbody")?.addEventListener("click", async (e) => {
+        const btn = e.target.closest("button[data-action='delete']");
+        if (!btn) return;
+        const feedId = Number(btn.dataset.id);
+        if (!feedId) return;
+        if (!confirm("Delete this feed record?")) return;
+        try {
+          const res = await API.delete(`/api/feed/${feedId}`);
           await loadPage({ type: "success", msg: res.message });
         } catch (err) {
           await loadPage({ type: "danger", msg: err.message });
