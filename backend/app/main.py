@@ -1,4 +1,12 @@
+"""Run from backend folder: uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+Or use backend\\run.bat. Running from backend/app with main:app also works (path fix below)."""
+import sys
 from pathlib import Path
+
+_BACKEND_ROOT = Path(__file__).resolve().parent.parent
+if str(_BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(_BACKEND_ROOT))
+
 import time
 
 from fastapi import FastAPI

@@ -35,8 +35,9 @@
               <td>${escapeHtml(l.water_color)}</td>
               <td>${escapeHtml(l.mortality_count)}</td>
               <td>${escapeHtml(l.notes || "")}</td>
+              <td><button type="button" class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${l.log_id}" title="Delete"><i class="fa-solid fa-trash"></i></button></td>
             </tr>`).join("")
-        : `<tr><td colspan="9" class="text-center text-muted py-3">No daily logs yet.</td></tr>`;
+        : `<tr><td colspan="10" class="text-center text-muted py-3">No daily logs yet.</td></tr>`;
 
       mountAppShell("daily", `
         <div class="mb-4 pb-2 border-bottom">
@@ -128,7 +129,7 @@
               <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0 small">
                   <thead class="table-light">
-                    <tr><th>Pond</th><th>Date</th><th>Temp</th><th>pH</th><th>Salinity</th><th>DO</th><th>Color</th><th>Mortality</th><th>Notes</th></tr>
+                    <tr><th>Pond</th><th>Date</th><th>Temp</th><th>pH</th><th>Salinity</th><th>DO</th><th>Color</th><th>Mortality</th><th>Notes</th><th>Delete</th></tr>
                   </thead>
                   <tbody>${rows}</tbody>
                 </table>
@@ -192,6 +193,20 @@ document.getElementById("recommendations").innerHTML =
 
 // Reset form
 e.target.reset();
+        } catch (err) {
+          await loadPage({ type: "danger", msg: err.message });
+        }
+      });
+
+      document.querySelector("table tbody")?.addEventListener("click", async (e) => {
+        const btn = e.target.closest("button[data-action='delete']");
+        if (!btn) return;
+        const logId = Number(btn.dataset.id);
+        if (!logId) return;
+        if (!confirm("Delete this daily observation?")) return;
+        try {
+          const res = await API.delete(`/api/daily/${logId}`);
+          await loadPage({ type: "success", msg: res.message });
         } catch (err) {
           await loadPage({ type: "danger", msg: err.message });
         }

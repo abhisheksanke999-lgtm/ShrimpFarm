@@ -1,20 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>AI Prediction - AquaControl</title>
 
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  >
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-  >
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/components.css">
@@ -22,55 +17,55 @@
 
 <body class="bg-main">
 
-<div id="app"></div>
+  <div id="app"></div>
 
-<script src="../js/api.js"></script>
-<script src="../js/layout.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
 
-<script>
+  <script>
 
-(async () => {
+    (async () => {
 
-  // =====================================================
-  // AUTHENTICATION
-  // =====================================================
+      // =====================================================
+      // AUTHENTICATION
+      // =====================================================
 
-  const user = await requireAuth();
+      const user = await requireAuth();
 
-  if (!user) return;
+      if (!user) return;
 
 
-  // =====================================================
-  // LOAD DAILY OBSERVATIONS
-  // =====================================================
+      // =====================================================
+      // LOAD DAILY OBSERVATIONS
+      // =====================================================
 
-  let dailyLogs = [];
+      let dailyLogs = [];
 
-  try {
+      try {
 
-    dailyLogs = await API.get("/api/daily");
+        dailyLogs = await API.get("/api/daily");
 
-  } catch (error) {
+      } catch (error) {
 
-    console.error("Could not load daily observations:", error);
+        console.error("Could not load daily observations:", error);
 
-    mountAppShell("ai-prediction", `
+        mountAppShell("ai-prediction", `
       <div class="alert alert-danger">
         Could not load daily observations.
       </div>
     `);
 
-    return;
-  }
+        return;
+      }
 
 
-  // =====================================================
-  // CHECK DATA
-  // =====================================================
+      // =====================================================
+      // CHECK DATA
+      // =====================================================
 
-  if (!dailyLogs || dailyLogs.length === 0) {
+      if (!dailyLogs || dailyLogs.length === 0) {
 
-    mountAppShell("ai-prediction", `
+        mountAppShell("ai-prediction", `
 
       <div class="mb-4 pb-2 border-bottom">
         <h4 class="fw-bold">AI Prediction</h4>
@@ -103,75 +98,75 @@
 
     `);
 
-    return;
-  }
+        return;
+      }
 
 
-  // =====================================================
-  // LATEST DAILY OBSERVATION
-  // =====================================================
+      // =====================================================
+      // LATEST DAILY OBSERVATION
+      // =====================================================
 
-  const latest = dailyLogs[0];
-
-
-  // =====================================================
-  // GET LATEST DISEASE PREDICTION
-  // =====================================================
-
-  let dashboardData = null;
-
-  try {
-
-    dashboardData = await API.get("/api/dashboard");
-
-  } catch (error) {
-
-    console.error("Could not load dashboard prediction:", error);
-
-  }
+      const latest = dailyLogs[0];
 
 
-  const latestPrediction =
-    dashboardData?.latest_prediction || null;
+      // =====================================================
+      // GET LATEST DISEASE PREDICTION
+      // =====================================================
+
+      let dashboardData = null;
+
+      try {
+
+        dashboardData = await API.get("/api/dashboard");
+
+      } catch (error) {
+
+        console.error("Could not load dashboard prediction:", error);
+
+      }
 
 
-  // =====================================================
-  // DEFAULT VALUES
-  // =====================================================
-
-  const pondName =
-    latest.pond_name || "";
-
-  const predictionDate =
-    latest.log_date || "";
-
-  const temperature =
-    Number(latest.temperature || 0);
-
-  const ph =
-    Number(latest.ph || 0);
-
-  const salinity =
-    Number(latest.salinity || 0);
-
-  const dissolvedOxygen =
-    Number(latest.dissolved_oxygen || 0);
-
-  const previousMortality =
-    Number(latest.mortality_count || 0);
-
-  const waterQuality =
-    latestPrediction?.water_quality || "Moderate";
-
-  const diseaseRisk =
-    latestPrediction?.disease_risk || "Healthy";
+      const latestPrediction =
+        dashboardData?.latest_prediction || null;
 
 
-  // =====================================================
-  // PAGE
-  // =====================================================
+      // =====================================================
+      // DEFAULT VALUES
+      // =====================================================
 
-  mountAppShell("ai-prediction", `
+      const pondName =
+        latest.pond_name || "";
+
+      const predictionDate =
+        latest.log_date || "";
+
+      const temperature =
+        Number(latest.temperature || 0);
+
+      const ph =
+        Number(latest.ph || 0);
+
+      const salinity =
+        Number(latest.salinity || 0);
+
+      const dissolvedOxygen =
+        Number(latest.dissolved_oxygen || 0);
+
+      const previousMortality =
+        Number(latest.mortality_count || 0);
+
+      const waterQuality =
+        latestPrediction?.water_quality || "Moderate";
+
+      const diseaseRisk =
+        latestPrediction?.disease_risk || "Healthy";
+
+
+      // =====================================================
+      // PAGE
+      // =====================================================
+
+      mountAppShell("ai-prediction", `
 
     <!-- ================================================= -->
     <!-- PAGE HEADER -->
@@ -879,142 +874,142 @@
   `);
 
 
-  // =====================================================
-  // GENERATE PREDICTION
-  // =====================================================
+      // =====================================================
+      // GENERATE PREDICTION
+      // =====================================================
 
-  document
-    .getElementById("predictBtn")
-    .addEventListener("click", async () => {
+      document
+        .getElementById("predictBtn")
+        .addEventListener("click", async () => {
 
-      const errorBox =
-        document.getElementById("errorBox");
+          const errorBox =
+            document.getElementById("errorBox");
 
-      const button =
-        document.getElementById("predictBtn");
+          const button =
+            document.getElementById("predictBtn");
 
-      errorBox.classList.add("d-none");
-
-
-      // ---------------------------------------------------
-      // READ VALUES
-      // ---------------------------------------------------
-
-      const payload = {
-
-        pond_name:
-          document.getElementById("pond_name").value,
-
-        prediction_date:
-          document.getElementById("prediction_date").value,
-
-        doc:
-          Number(document.getElementById("doc").value || 0),
-
-        avg_weight:
-          Number(document.getElementById("avg_weight").value || 0),
-
-        biomass:
-          Number(document.getElementById("biomass").value || 0),
-
-        temperature:
-          Number(document.getElementById("temperature").value || 0),
-
-        dissolved_oxygen:
-          Number(
-            document.getElementById("dissolved_oxygen").value || 0
-          ),
-
-        water_quality:
-          document.getElementById("water_quality").value,
-
-        disease_risk:
-          document.getElementById("disease_risk").value,
-
-        yesterday_feed:
-          Number(
-            document.getElementById("yesterday_feed").value || 0
-          ),
-
-        ph:
-          Number(document.getElementById("ph").value || 0),
-
-        salinity:
-          Number(document.getElementById("salinity").value || 0),
-
-        previous_mortality:
-          Number(
-            document.getElementById("previous_mortality").value || 0
-          ),
-
-        survival_rate:
-          Number(
-            document.getElementById("survival_rate").value || 0
-          ),
-
-        fcr:
-          Number(document.getElementById("fcr").value || 0),
-
-        market_price:
-          Number(
-            document.getElementById("market_price").value || 0
-          ),
-
-        feed_cost:
-          Number(
-            document.getElementById("feed_cost").value || 0
-          ),
-
-        seed_cost:
-          Number(
-            document.getElementById("seed_cost").value || 0
-          ),
-
-        medicine_cost:
-          Number(
-            document.getElementById("medicine_cost").value || 0
-          ),
-
-        electricity_cost:
-          Number(
-            document.getElementById("electricity_cost").value || 0
-          ),
-
-        labour_cost:
-          Number(
-            document.getElementById("labour_cost").value || 0
-          ),
-
-        other_expenses:
-          Number(
-            document.getElementById("other_expenses").value || 0
-          )
-
-      };
+          errorBox.classList.add("d-none");
 
 
-      // ---------------------------------------------------
-      // BASIC VALIDATION
-      // ---------------------------------------------------
+          // ---------------------------------------------------
+          // READ VALUES
+          // ---------------------------------------------------
 
-      if (!payload.pond_name) {
+          const payload = {
 
-        errorBox.textContent =
-          "Pond name is missing. Add a Daily Observation first.";
+            pond_name:
+              document.getElementById("pond_name").value,
 
-        errorBox.classList.remove("d-none");
+            prediction_date:
+              document.getElementById("prediction_date").value,
 
-        return;
-      }
+            doc:
+              Number(document.getElementById("doc").value || 0),
+
+            avg_weight:
+              Number(document.getElementById("avg_weight").value || 0),
+
+            biomass:
+              Number(document.getElementById("biomass").value || 0),
+
+            temperature:
+              Number(document.getElementById("temperature").value || 0),
+
+            dissolved_oxygen:
+              Number(
+                document.getElementById("dissolved_oxygen").value || 0
+              ),
+
+            water_quality:
+              document.getElementById("water_quality").value,
+
+            disease_risk:
+              document.getElementById("disease_risk").value,
+
+            yesterday_feed:
+              Number(
+                document.getElementById("yesterday_feed").value || 0
+              ),
+
+            ph:
+              Number(document.getElementById("ph").value || 0),
+
+            salinity:
+              Number(document.getElementById("salinity").value || 0),
+
+            previous_mortality:
+              Number(
+                document.getElementById("previous_mortality").value || 0
+              ),
+
+            survival_rate:
+              Number(
+                document.getElementById("survival_rate").value || 0
+              ),
+
+            fcr:
+              Number(document.getElementById("fcr").value || 0),
+
+            market_price:
+              Number(
+                document.getElementById("market_price").value || 0
+              ),
+
+            feed_cost:
+              Number(
+                document.getElementById("feed_cost").value || 0
+              ),
+
+            seed_cost:
+              Number(
+                document.getElementById("seed_cost").value || 0
+              ),
+
+            medicine_cost:
+              Number(
+                document.getElementById("medicine_cost").value || 0
+              ),
+
+            electricity_cost:
+              Number(
+                document.getElementById("electricity_cost").value || 0
+              ),
+
+            labour_cost:
+              Number(
+                document.getElementById("labour_cost").value || 0
+              ),
+
+            other_expenses:
+              Number(
+                document.getElementById("other_expenses").value || 0
+              )
+
+          };
 
 
-      // ---------------------------------------------------
-      // LOADING
-      // ---------------------------------------------------
+          // ---------------------------------------------------
+          // BASIC VALIDATION
+          // ---------------------------------------------------
 
-      button.disabled = true;
+          if (!payload.pond_name) {
 
-      button.innerHTML = `
+            errorBox.textContent =
+              "Pond name is missing. Add a Daily Observation first.";
+
+            errorBox.classList.remove("d-none");
+
+            return;
+          }
+
+
+          // ---------------------------------------------------
+          // LOADING
+          // ---------------------------------------------------
+
+          button.disabled = true;
+
+          button.innerHTML = `
         <span
           class="spinner-border spinner-border-sm me-2"
         ></span>
@@ -1022,166 +1017,167 @@
       `;
 
 
-      try {
+          try {
 
-        // -------------------------------------------------
-        // CALL BACKEND
-        // -------------------------------------------------
+            // -------------------------------------------------
+            // CALL BACKEND
+            // -------------------------------------------------
 
-        const result =
-          await API.post(
-            "/api/ml/predict-all",
-            payload
-          );
-
-
-        console.log(
-          "AI Prediction Result:",
-          result
-        );
+            const result =
+              await API.post(
+                "/api/ml/predict-all",
+                payload
+              );
 
 
-        // -------------------------------------------------
-        // FEED
-        // -------------------------------------------------
-
-        if (result.feed) {
-
-          document.getElementById("feedResult")
-            .textContent =
-            Number(
-              result.feed.recommended_feed || 0
-            ).toFixed(2);
-
-          document.getElementById("feedMessage")
-            .textContent =
-            result.feed.message || "Continue normal feeding.";
-
-        }
+            console.log(
+              "AI Prediction Result:",
+              result
+            );
 
 
-        // -------------------------------------------------
-        // MORTALITY
-        // -------------------------------------------------
+            // -------------------------------------------------
+            // FEED
+            // -------------------------------------------------
 
-        if (result.mortality) {
+            if (result.feed) {
 
-          document.getElementById("mortalityResult")
-            .textContent =
-            result.mortality.mortality_risk || "N/A";
+              document.getElementById("feedResult")
+                .textContent =
+                Number(
+                  result.feed.recommended_feed || 0
+                ).toFixed(2);
 
+              document.getElementById("feedMessage")
+                .textContent =
+                result.feed.message || "Continue normal feeding.";
 
-          const recommendations =
-            result.mortality.recommendations || [];
-
-
-          document.getElementById(
-            "mortalityRecommendations"
-          ).innerHTML =
-            recommendations.length
-
-              ? recommendations
-                  .map(
-                    item =>
-                      `<li>${escapeHtml(item)}</li>`
-                  )
-                  .join("")
-
-              : "<li>No recommendations.</li>";
-
-        }
+            }
 
 
-        // -------------------------------------------------
-        // HARVEST
-        // -------------------------------------------------
+            // -------------------------------------------------
+            // MORTALITY
+            // -------------------------------------------------
 
-        if (result.harvest) {
+            if (result.mortality) {
 
-          document.getElementById("harvestResult")
-            .textContent =
-            Number(
-              result.harvest.expected_harvest_weight || 0
-            ).toFixed(2);
-
-          document.getElementById("harvestUnit")
-            .textContent =
-            result.harvest.unit || "kg";
-
-        }
+              document.getElementById("mortalityResult")
+                .textContent =
+                result.mortality.mortality_risk || "N/A";
 
 
-        // -------------------------------------------------
-        // PROFIT
-        // -------------------------------------------------
-
-        if (result.profit) {
-
-          document.getElementById("profitResult")
-            .textContent =
-            "₹" +
-            Number(
-              result.profit.expected_profit || 0
-            ).toLocaleString("en-IN", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
-            });
-
-          document.getElementById("profitCurrency")
-            .textContent =
-            result.profit.currency || "INR";
-
-        }
+              const recommendations =
+                result.mortality.recommendations || [];
 
 
-        // -------------------------------------------------
-        // SHOW RESULTS
-        // -------------------------------------------------
+              document.getElementById(
+                "mortalityRecommendations"
+              ).innerHTML =
+                recommendations.length
 
-        document
-          .getElementById("resultsSection")
-          .classList.remove("d-none");
+                  ? recommendations
+                    .map(
+                      item =>
+                        `<li>${escapeHtml(item)}</li>`
+                    )
+                    .join("")
 
+                  : "<li>No recommendations.</li>";
 
-        // Scroll to results
-
-        document
-          .getElementById("resultsSection")
-          .scrollIntoView({
-            behavior: "smooth"
-          });
-
-
-      } catch (error) {
-
-        console.error(
-          "AI prediction error:",
-          error
-        );
+            }
 
 
-        errorBox.textContent =
-          error?.message ||
-          "Prediction failed. Please check the backend.";
+            // -------------------------------------------------
+            // HARVEST
+            // -------------------------------------------------
 
-        errorBox.classList.remove("d-none");
+            if (result.harvest) {
 
-      } finally {
+              document.getElementById("harvestResult")
+                .textContent =
+                Number(
+                  result.harvest.expected_harvest_weight || 0
+                ).toFixed(2);
 
-        button.disabled = false;
+              document.getElementById("harvestUnit")
+                .textContent =
+                result.harvest.unit || "kg";
 
-        button.innerHTML = `
+            }
+
+
+            // -------------------------------------------------
+            // PROFIT
+            // -------------------------------------------------
+
+            if (result.profit) {
+
+              document.getElementById("profitResult")
+                .textContent =
+                "₹" +
+                Number(
+                  result.profit.expected_profit || 0
+                ).toLocaleString("en-IN", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                });
+
+              document.getElementById("profitCurrency")
+                .textContent =
+                result.profit.currency || "INR";
+
+            }
+
+
+            // -------------------------------------------------
+            // SHOW RESULTS
+            // -------------------------------------------------
+
+            document
+              .getElementById("resultsSection")
+              .classList.remove("d-none");
+
+
+            // Scroll to results
+
+            document
+              .getElementById("resultsSection")
+              .scrollIntoView({
+                behavior: "smooth"
+              });
+
+
+          } catch (error) {
+
+            console.error(
+              "AI prediction error:",
+              error
+            );
+
+
+            errorBox.textContent =
+              error?.message ||
+              "Prediction failed. Please check the backend.";
+
+            errorBox.classList.remove("d-none");
+
+          } finally {
+
+            button.disabled = false;
+
+            button.innerHTML = `
           <i class="fa-solid fa-wand-magic-sparkles me-2"></i>
           Generate AI Predictions
         `;
 
-      }
+          }
 
-    });
+        });
 
-})();
+    })();
 
-</script>
+  </script>
 
 </body>
+
 </html>

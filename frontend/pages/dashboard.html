@@ -7,13 +7,9 @@
 
   <title>Dashboard - AquaControl</title>
 
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/components.css">
@@ -210,8 +206,8 @@
                   <h6 class="fw-bold mb-0 mt-1">
 
                     ${escapeHtml(
-                      prediction.water_quality || "N/A"
-                    )}
+          prediction.water_quality || "N/A"
+        )}
 
                   </h6>
 
@@ -232,17 +228,16 @@
 
                   <h6 class="fw-bold mb-0 mt-1">
 
-                    ${
-                      prediction.disease_risk === "Healthy"
+                    ${prediction.disease_risk === "Healthy"
 
-                        ? "🟢 Healthy"
+          ? "🟢 Healthy"
 
-                        : prediction.disease_risk === "Moderate"
+          : prediction.disease_risk === "Moderate"
 
-                        ? "🟡 Moderate"
+            ? "🟡 Moderate"
 
-                        : "🔴 High Risk"
-                    }
+            : "🔴 High Risk"
+        }
 
                   </h6>
 
@@ -263,9 +258,7 @@
 
                   <h6 class="fw-bold mb-0 mt-1">
 
-                    ${
-                      prediction.disease_confidence ?? 0
-                    }%
+                    ${prediction.disease_confidence ?? 0}%
 
                   </h6>
 
@@ -288,20 +281,19 @@
 
             <ul class="mb-0">
 
-              ${
-                prediction.alerts
+              ${prediction.alerts
 
-                  ? prediction.alerts
-                      .split("\n")
-                      .filter(a => a.trim() !== "")
-                      .map(
-                        a =>
-                          `<li>${escapeHtml(a)}</li>`
-                      )
-                      .join("")
+          ? prediction.alerts
+            .split("\n")
+            .filter(a => a.trim() !== "")
+            .map(
+              a =>
+                `<li>${escapeHtml(a)}</li>`
+            )
+            .join("")
 
-                  : "<li>No recommendations available.</li>"
-              }
+          : "<li>No recommendations available.</li>"
+        }
 
             </ul>
 
@@ -506,8 +498,8 @@
                   <h3 class="fw-bold mb-0 text-danger">
 
                     Rs.${Number(
-                      data.total_expenses
-                    ).toFixed(2)}
+        data.total_expenses
+      ).toFixed(2)}
 
                   </h3>
 
