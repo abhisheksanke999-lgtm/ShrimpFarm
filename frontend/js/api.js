@@ -1,13 +1,24 @@
 // Shared API helpers for AquaControl frontend
 // Same-origin when FastAPI serves the UI; otherwise point at local or production API.
 const API_BASE = (() => {
-  const { hostname, port } = window.location;
-  const local = hostname === "localhost" || hostname === "127.0.0.1";
-  if (local && (port === "8000" || port === "")) {
-    return ""; // FastAPI serves pages + API — first-party cookies work
-  }
-  if (local) {
-    return "http://127.0.0.1:8000"; // Live Server → local backend
+  const { hostname, port, protocol } = window.location;
+  const isLocalHost =
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "0.0.0.0" ||
+    hostname === "::1" ||
+    hostname.startsWith("192.168.") ||
+    hostname.startsWith("10.") ||
+    hostname.endsWith(".local") ||
+    protocol === "file:" ||
+    hostname === "";
+
+  if (isLocalHost) {
+    if (port === "8000") {
+      return ""; // FastAPI serves pages + API — first-party cookies work
+    }
+    const host = (hostname === "localhost" || hostname === "127.0.0.1") ? hostname : "127.0.0.1";
+    return `http://${host}:8000`; // Live Server / local dev server → local backend
   }
   return "https://acqacontrol.onrender.com"; // Deployed frontend (e.g. Vercel)
 })();
@@ -46,9 +57,7 @@ const API = {
       res = await fetch(`${API_BASE}${path}`, opts);
     } catch {
       throw Object.assign(
-        new Error(
-          "Cannot reach the API server. Start the backend with: uvicorn app.main:app --reload (http://127.0.0.1:8000)"
-        ),
+        new Error("Server is not reachable"),
         { status: 0 }
       );
     }
@@ -117,7 +126,19 @@ function escapeHtml(value) {
 async function requireAuth() {
   try {
     return await API.get("/api/auth/me");
-  } catch {
+  } catch (err) {
+    if (err?.status === 0 || err?.message === "Server is not reachable") {
+      const appEl = document.getElementById("app");
+      if (appEl && typeof mountAppShell === "function") {
+        mountAppShell("", `
+          <div class="alert alert-danger shadow-sm rounded-3 p-4 my-4">
+            <h5 class="fw-bold mb-2"><i class="fa-solid fa-triangle-exclamation me-2"></i>Server is not reachable</h5>
+            <p class="mb-0 text-muted small">Could not connect to the backend API. Please verify that the server is running and try again.</p>
+          </div>
+        `);
+      }
+      return null;
+    }
     window.location.href = loginPageUrl();
     return null;
   }

@@ -2,6 +2,7 @@ from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user
@@ -72,6 +73,9 @@ class PredictAllRequest(BaseModel):
 # =========================================================
 
 @router.post("/predict-all")
+@router.post("/predict-all/")
+@router.post("/predict")
+@router.post("/predict/")
 def predict_all(
     payload: PredictAllRequest,
     db: Session = Depends(get_db),
@@ -94,39 +98,44 @@ def predict_all(
         db.query(Pond)
         .filter(
             Pond.user_id == user.id,
-            Pond.name == pond_name,
+            func.lower(func.trim(Pond.name)) == pond_name.lower(),
         )
         .first()
     )
 
     if not pond:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid pond selected.",
+        # Check if user has observations for this pond
+        obs = (
+            db.query(DailyObservation)
+            .filter(
+                DailyObservation.user_id == user.id,
+                func.lower(func.trim(DailyObservation.pond_name)) == pond_name.lower(),
+            )
+            .first()
         )
+        if not obs:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid pond selected.",
+            )
+        pond_name = obs.pond_name
+    else:
+        pond_name = pond.name
 
     # =====================================================
     # 2. GET PREVIOUS MORTALITY AUTOMATICALLY
     # =====================================================
 
     try:
-
-        prediction_date = date.fromisoformat(
-            payload.prediction_date
-        )
-
-    except ValueError:
-
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid prediction date.",
-        )
+        prediction_date = date.fromisoformat(str(payload.prediction_date).strip())
+    except (ValueError, TypeError, AttributeError):
+        prediction_date = date.today()
 
     previous_observation = (
         db.query(DailyObservation)
         .filter(
             DailyObservation.user_id == user.id,
-            DailyObservation.pond_name == pond_name,
+            func.lower(DailyObservation.pond_name) == pond_name.lower(),
             DailyObservation.log_date < prediction_date,
         )
         .order_by(
@@ -138,9 +147,32 @@ def predict_all(
 
     previous_mortality = (
         float(previous_observation.mortality_count)
-        if previous_observation
+        if previous_observation and previous_observation.mortality_count is not None
         else 0
     )
+
+    # Normalize categorical inputs
+    wq_input = (payload.water_quality or "").strip().title()
+    if wq_input in ("Good", "Moderate", "Poor"):
+        water_quality = wq_input
+    elif "good" in wq_input.lower():
+        water_quality = "Good"
+    elif "poor" in wq_input.lower():
+        water_quality = "Poor"
+    else:
+        water_quality = "Moderate"
+
+    dr_input = (payload.disease_risk or "").strip().title()
+    if dr_input in ("Healthy", "Moderate", "High"):
+        disease_risk = dr_input
+    elif "low" in dr_input.lower() or "health" in dr_input.lower():
+        disease_risk = "Healthy"
+    elif "mod" in dr_input.lower():
+        disease_risk = "Moderate"
+    elif "high" in dr_input.lower():
+        disease_risk = "High"
+    else:
+        disease_risk = "Healthy"
 
     # =====================================================
     # 3. GET DISEASE CONFIDENCE FROM DAILY PREDICTION
@@ -150,7 +182,7 @@ def predict_all(
         db.query(PredictionRecord)
         .filter(
             PredictionRecord.user_id == user.id,
-            PredictionRecord.pond_name == pond_name,
+            func.lower(PredictionRecord.pond_name) == pond_name.lower(),
             PredictionRecord.disease_confidence.isnot(None),
         )
         .order_by(
@@ -161,7 +193,7 @@ def predict_all(
 
     disease_confidence = (
         float(disease_record.disease_confidence)
-        if disease_record
+        if disease_record and disease_record.disease_confidence is not None
         else 0
     )
 
@@ -177,8 +209,8 @@ def predict_all(
             biomass=payload.biomass,
             temperature=payload.temperature,
             dissolved_oxygen=payload.dissolved_oxygen,
-            water_quality=payload.water_quality,
-            disease_risk=payload.disease_risk,
+            water_quality=water_quality,
+            disease_risk=disease_risk,
             yesterday_feed=payload.yesterday_feed,
         )
 
@@ -201,8 +233,8 @@ def predict_all(
             ph=payload.ph,
             dissolved_oxygen=payload.dissolved_oxygen,
             salinity=payload.salinity,
-            water_quality=payload.water_quality,
-            disease_risk=payload.disease_risk,
+            water_quality=water_quality,
+            disease_risk=disease_risk,
             recommended_feed=feed_prediction["recommended_feed"],
             previous_mortality=previous_mortality,
         )
@@ -226,8 +258,8 @@ def predict_all(
             biomass=payload.biomass,
             survival_rate=payload.survival_rate,
             fcr=payload.fcr,
-            water_quality=payload.water_quality,
-            disease_risk=payload.disease_risk,
+            water_quality=water_quality,
+            disease_risk=disease_risk,
             mortality_risk=mortality_prediction[
                 "mortality_risk"
             ],
@@ -281,9 +313,9 @@ def predict_all(
             pond_name=pond_name,
             prediction_date=prediction_date,
 
-            water_quality=payload.water_quality,
+            water_quality=water_quality,
 
-            disease_risk=payload.disease_risk,
+            disease_risk=disease_risk,
 
             # Preserve disease confidence
             disease_confidence=disease_confidence,

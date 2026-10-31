@@ -39,8 +39,18 @@
       // LOAD DASHBOARD DATA
       // =====================================================
 
-      const data = await API.get("/api/dashboard");
-
+      let data;
+      try {
+        data = await API.get("/api/dashboard");
+      } catch (err) {
+        mountAppShell("dashboard", `
+          <div class="alert alert-danger shadow-sm rounded-3 p-4 my-4">
+            <h5 class="fw-bold mb-2"><i class="fa-solid fa-triangle-exclamation me-2"></i>${err?.status === 0 || err?.message === "Server is not reachable" ? "Server is not reachable" : "Could not load dashboard"}</h5>
+            <p class="mb-0 text-muted small">${err?.status === 0 || err?.message === "Server is not reachable" ? "Could not connect to the backend API. Please verify that the server is running." : (err?.message || "")}</p>
+          </div>
+        `);
+        return;
+      }
 
       // Latest AI prediction
       const prediction = data.latest_prediction;
