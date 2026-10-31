@@ -24,30 +24,18 @@ def predict_harvest(
     recommended_feed,
 ):
 
-    row = pd.DataFrame(
-        [[
-            doc,
-            avg_weight,
-            biomass,
-            survival_rate,
-            fcr,
-            water_encoder.transform([water_quality])[0],
-            disease_encoder.transform([disease_risk])[0],
-            mortality_encoder.transform([mortality_risk])[0],
-            recommended_feed,
-        ]],
-        columns=[
-            "doc",
-            "avg_weight",
-            "biomass",
-            "survival_rate",
-            "fcr",
-            "water_quality",
-            "disease_risk",
-            "mortality_risk",
-            "recommended_feed",
-        ],
-    )
+    # Build row as a list of lists (compatible with scikit-learn)
+    row = [[
+        doc,
+        avg_weight,
+        biomass,
+        survival_rate,
+        fcr,
+        water_encoder.transform([water_quality])[0],
+        disease_encoder.transform([disease_risk])[0],
+        mortality_encoder.transform([mortality_risk])[0],
+        recommended_feed,
+    ]]
 
     prediction = model.predict(row)[0]
 

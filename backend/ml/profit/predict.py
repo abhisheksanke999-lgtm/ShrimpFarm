@@ -2,7 +2,6 @@ from pathlib import Path
 
 import joblib
 
-
 PROFIT_DIR = Path(__file__).resolve().parent
 
 model = joblib.load(PROFIT_DIR / "model.pkl")
@@ -20,30 +19,18 @@ def predict_profit(
     survival_rate,
 ):
 
-    row = pd.DataFrame(
-        [[
-            harvest_weight,
-            market_price,
-            feed_cost,
-            seed_cost,
-            medicine_cost,
-            electricity_cost,
-            labour_cost,
-            other_expenses,
-            survival_rate,
-        ]],
-        columns=[
-            "harvest_weight",
-            "market_price",
-            "feed_cost",
-            "seed_cost",
-            "medicine_cost",
-            "electricity_cost",
-            "labour_cost",
-            "other_expenses",
-            "survival_rate",
-        ],
-    )
+    # Build row as a list of lists (compatible with scikit-learn)
+    row = [[
+        harvest_weight,
+        market_price,
+        feed_cost,
+        seed_cost,
+        medicine_cost,
+        electricity_cost,
+        labour_cost,
+        other_expenses,
+        survival_rate,
+    ]]
 
     prediction = model.predict(row)[0]
 
