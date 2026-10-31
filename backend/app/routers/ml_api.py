@@ -14,12 +14,6 @@ from app.models import (
     User,
 )
 
-from ml.feed.predict import predict_feed
-from ml.mortality.predict import predict_mortality
-from ml.harvest.predict import predict_harvest
-from ml.profit.predict import predict_profit
-
-
 router = APIRouter(
     prefix="/api/ml",
     tags=["ml"],
@@ -202,6 +196,7 @@ def predict_all(
     # =====================================================
 
     try:
+        from ml.feed.predict import predict_feed
 
         feed_prediction = predict_feed(
             doc=payload.doc,
@@ -226,6 +221,7 @@ def predict_all(
     # =====================================================
 
     try:
+        from ml.mortality.predict import predict_mortality
 
         mortality_prediction = predict_mortality(
             doc=payload.doc,
@@ -251,6 +247,7 @@ def predict_all(
     # =====================================================
 
     try:
+        from ml.harvest.predict import predict_harvest
 
         harvest_prediction = predict_harvest(
             doc=payload.doc,
@@ -280,6 +277,7 @@ def predict_all(
     # =====================================================
 
     try:
+        from ml.profit.predict import predict_profit
 
         profit_prediction = predict_profit(
             harvest_weight=harvest_prediction[

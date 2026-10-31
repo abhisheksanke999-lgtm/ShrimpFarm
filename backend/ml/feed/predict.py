@@ -2,20 +2,21 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import joblib
-
-
-# ===================================
-# Paths
-# ===================================
+from ml._lazy import load_pkl
 
 FEED_DIR = Path(__file__).resolve().parent
 
-model = joblib.load(FEED_DIR / "model.pkl")
 
-water_encoder = joblib.load(FEED_DIR / "water_encoder.pkl")
+def _model():
+    return load_pkl(FEED_DIR, "model.pkl")
 
-disease_encoder = joblib.load(FEED_DIR / "disease_encoder.pkl")
+
+def _water_encoder():
+    return load_pkl(FEED_DIR, "water_encoder.pkl")
+
+
+def _disease_encoder():
+    return load_pkl(FEED_DIR, "disease_encoder.pkl")
 
 
 def predict_feed(
@@ -28,19 +29,21 @@ def predict_feed(
     disease_risk,
     yesterday_feed,
 ):
+    water_encoder = _water_encoder()
+    disease_encoder = _disease_encoder()
+    model = _model()
 
-    water_quality = water_encoder.transform([water_quality])[0]
-    disease_risk = disease_encoder.transform([disease_risk])[0]
+    wq = water_encoder.transform([water_quality])[0]
+    dr = disease_encoder.transform([disease_risk])[0]
 
-    # Build row as a list of lists (compatible with scikit‑learn)
     row = [[
         doc,
         avg_weight,
         biomass,
         temperature,
         dissolved_oxygen,
-        water_quality,
-        disease_risk,
+        wq,
+        dr,
         yesterday_feed,
     ]]
 
@@ -57,19 +60,3 @@ def predict_feed(
         "recommended_feed": round(float(prediction), 2),
         "message": message,
     }
-
-
-if __name__ == "__main__":
-
-    result = predict_feed(
-        doc=65,
-        avg_weight=18,
-        biomass=4200,
-        temperature=31,
-        dissolved_oxygen=5.5,
-        water_quality="Good",
-        disease_risk="Healthy",
-        yesterday_feed=180,
-    )
-
-    print(result)

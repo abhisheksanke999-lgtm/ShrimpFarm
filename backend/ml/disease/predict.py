@@ -4,20 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import joblib
-
-
-# =====================================
-# Paths
-# =====================================
+from ml._lazy import load_pkl
 
 DISEASE_DIR = Path(__file__).resolve().parent
-
-model = joblib.load(DISEASE_DIR / "model.pkl")
-water_encoder = joblib.load(DISEASE_DIR / "water_encoder.pkl")
-disease_encoder = joblib.load(DISEASE_DIR / "encoder.pkl")
-
-KNOWN_WATER_COLORS = list(getattr(water_encoder, "classes_", []))
 
 WATER_COLOR_ALIASES = {
     "goldiesh brown": "Brown",
@@ -32,7 +21,6 @@ WATER_COLOR_ALIASES = {
     "brown": "Brown",
 }
 
-# Fallback feature order if older model has no feature_names_in_
 DEFAULT_FEATURES = [
     "temperature",
     "ph",
@@ -45,32 +33,43 @@ DEFAULT_FEATURES = [
 ]
 
 
+def _model():
+    return load_pkl(DISEASE_DIR, "model.pkl")
+
+
+def _water_encoder():
+    return load_pkl(DISEASE_DIR, "water_encoder.pkl")
+
+
+def _disease_encoder():
+    return load_pkl(DISEASE_DIR, "encoder.pkl")
+
+
+def _known_water_colors() -> list:
+    enc = _water_encoder()
+    return list(getattr(enc, "classes_", []))
+
+
 def _normalize_water_color(water_color: str) -> str:
+    known = _known_water_colors()
     raw = (water_color or "").strip()
 
     if not raw:
-        return (
-            "Light Green"
-            if "Light Green" in KNOWN_WATER_COLORS
-            else KNOWN_WATER_COLORS[0]
-        )
+        return "Light Green" if "Light Green" in known else known[0]
 
-    if raw in KNOWN_WATER_COLORS:
+    if raw in known:
         return raw
 
     alias = WATER_COLOR_ALIASES.get(raw.lower())
-
-    if alias and alias in KNOWN_WATER_COLORS:
+    if alias and alias in known:
         return alias
 
-    lower_map = {c.lower(): c for c in KNOWN_WATER_COLORS}
-
+    lower_map = {c.lower(): c for c in known}
     if raw.lower() in lower_map:
         return lower_map[raw.lower()]
 
     raise ValueError(
-        f"Unknown water color '{water_color}'. "
-        f"Allowed: {', '.join(KNOWN_WATER_COLORS)}"
+        f"Unknown water color '{water_color}'. Allowed: {', '.join(known)}"
     )
 
 
@@ -84,6 +83,10 @@ def predict_disease(
     feed_given: float = 100,
     pond_age: int = 60,
 ):
+    model = _model()
+    water_encoder = _water_encoder()
+    disease_encoder = _disease_encoder()
+
     color = _normalize_water_color(str(water_color))
     water_color_encoded = int(water_encoder.transform([color])[0])
 
@@ -99,8 +102,6 @@ def predict_disease(
     }
 
     feature_names = list(getattr(model, "feature_names_in_", DEFAULT_FEATURES))
-
-    # Build row as a list of lists (compatible with scikit‑learn)
     row = [[values[name] for name in feature_names]]
 
     prediction = model.predict(row)[0]
@@ -132,16 +133,3 @@ def predict_disease(
         "confidence": round(probability * 100, 2),
         "recommendations": recommendations,
     }
-
-
-if __name__ == "__main__":
-    result = predict_disease(
-        temperature=31,
-        ph=7.8,
-        dissolved_oxygen=3.2,
-        salinity=18,
-        water_color="Dark Green",
-        mortality_count=12,
-    )
-
-    print(result)

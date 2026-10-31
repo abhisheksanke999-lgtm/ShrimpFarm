@@ -1,5 +1,6 @@
 fastapi==0.141.1
-uvicorn[standard]==0.52.0
+# Plain uvicorn (no [standard]) — saves RAM on Render 512MB tier
+uvicorn==0.52.0
 sqlalchemy==2.0.51
 psycopg2-binary==2.9.12
 python-dotenv==1.2.2

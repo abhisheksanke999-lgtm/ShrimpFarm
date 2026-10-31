@@ -1,3 +1,4 @@
+import os
 from collections.abc import Generator
 from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
@@ -29,13 +30,21 @@ def normalize_database_url(url: str) -> str:
 
 settings = get_settings()
 DATABASE_URL = normalize_database_url(settings.database_url)
-print("DATABASE_URL =", DATABASE_URL)
+
+_on_render = os.getenv("RENDER") == "true" or bool(os.getenv("RENDER_SERVICE_ID"))
+_pool_size = 2 if _on_render else 5
+_max_overflow = 3 if _on_render else 10
+
+if _on_render:
+    print("Database engine: Render mode (small connection pool)")
+else:
+    print("Database engine: local/dev mode")
 
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=10,
+    pool_size=_pool_size,
+    max_overflow=_max_overflow,
     connect_args={"connect_timeout": 15},
 )
 

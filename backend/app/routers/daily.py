@@ -6,8 +6,6 @@ from app.database import get_db
 from app.models import DailyObservation, Pond, PredictionRecord, User
 from app.schemas import DailyCreate, DailyOut, DailyPredictionResponse, MessageOut
 
-from ml.disease.predict import predict_disease
-
 
 router = APIRouter(
     prefix="/api/daily",
@@ -152,6 +150,7 @@ def create_daily(
         # -------------------------
         # 4. Disease prediction ONLY
         # -------------------------
+        from ml.disease.predict import predict_disease
 
         disease_prediction = predict_disease(
             temperature=payload.temperature,

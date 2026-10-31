@@ -191,16 +191,8 @@ def on_startup() -> None:
             # Test Neon/PostgreSQL connection
             info = test_connection()
 
-            # Create database tables
-            print(Base.metadata.tables.keys())
-
-            Base.metadata.create_all(
-                bind=engine
-            )
-
-            print(
-                "Tables created successfully"
-            )
+            Base.metadata.create_all(bind=engine)
+            print(f"Database tables ready ({len(Base.metadata.tables)} tables).")
 
             # Seed admin account
             db = SessionLocal()

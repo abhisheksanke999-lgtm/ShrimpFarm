@@ -1,15 +1,26 @@
+from __future__ import annotations
+
 from pathlib import Path
 
-import joblib
-
+from ml._lazy import load_pkl
 
 HARVEST_DIR = Path(__file__).resolve().parent
 
-model = joblib.load(HARVEST_DIR / "model.pkl")
 
-water_encoder = joblib.load(HARVEST_DIR / "water_encoder.pkl")
-disease_encoder = joblib.load(HARVEST_DIR / "disease_encoder.pkl")
-mortality_encoder = joblib.load(HARVEST_DIR / "mortality_encoder.pkl")
+def _model():
+    return load_pkl(HARVEST_DIR, "model.pkl")
+
+
+def _water_encoder():
+    return load_pkl(HARVEST_DIR, "water_encoder.pkl")
+
+
+def _disease_encoder():
+    return load_pkl(HARVEST_DIR, "disease_encoder.pkl")
+
+
+def _mortality_encoder():
+    return load_pkl(HARVEST_DIR, "mortality_encoder.pkl")
 
 
 def predict_harvest(
@@ -23,8 +34,11 @@ def predict_harvest(
     mortality_risk,
     recommended_feed,
 ):
+    model = _model()
+    water_encoder = _water_encoder()
+    disease_encoder = _disease_encoder()
+    mortality_encoder = _mortality_encoder()
 
-    # Build row as a list of lists (compatible with scikit-learn)
     row = [[
         doc,
         avg_weight,
@@ -41,22 +55,5 @@ def predict_harvest(
 
     return {
         "expected_harvest_weight": round(float(prediction), 2),
-        "unit": "kg"
+        "unit": "kg",
     }
-
-
-if __name__ == "__main__":
-
-    result = predict_harvest(
-        doc=110,
-        avg_weight=28,
-        biomass=6200,
-        survival_rate=88,
-        fcr=1.4,
-        water_quality="Good",
-        disease_risk="Healthy",
-        mortality_risk="Low",
-        recommended_feed=220,
-    )
-
-    print(result)

@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 from pathlib import Path
 
-import joblib
+from ml._lazy import load_pkl
 
 PROFIT_DIR = Path(__file__).resolve().parent
 
-model = joblib.load(PROFIT_DIR / "model.pkl")
+
+def _model():
+    return load_pkl(PROFIT_DIR, "model.pkl")
 
 
 def predict_profit(
@@ -18,8 +22,8 @@ def predict_profit(
     other_expenses,
     survival_rate,
 ):
+    model = _model()
 
-    # Build row as a list of lists (compatible with scikit-learn)
     row = [[
         harvest_weight,
         market_price,
@@ -38,20 +42,3 @@ def predict_profit(
         "expected_profit": round(float(prediction), 2),
         "currency": "INR",
     }
-
-
-if __name__ == "__main__":
-
-    result = predict_profit(
-        harvest_weight=4500,
-        market_price=420,
-        feed_cost=180000,
-        seed_cost=70000,
-        medicine_cost=15000,
-        electricity_cost=25000,
-        labour_cost=30000,
-        other_expenses=12000,
-        survival_rate=90,
-    )
-
-    print(result)
