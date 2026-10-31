@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import joblib
-import pandas as pd
+
 
 # =====================================
 # Paths
@@ -100,11 +100,8 @@ def predict_disease(
 
     feature_names = list(getattr(model, "feature_names_in_", DEFAULT_FEATURES))
 
-    # Create DataFrame with correct feature names
-    row = pd.DataFrame(
-        [[values[name] for name in feature_names]],
-        columns=feature_names,
-    )
+    # Build row as a list of lists (compatible with scikit‑learn)
+    row = [[values[name] for name in feature_names]]
 
     prediction = model.predict(row)[0]
     probability = float(model.predict_proba(row).max())
