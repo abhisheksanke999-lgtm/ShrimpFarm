@@ -9,14 +9,14 @@ if str(_BACKEND_ROOT) not in sys.path:
 
 import time
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
-from app.auth import hash_password, verify_password
-from app.database import Base, SessionLocal, engine, test_connection
+from app.auth import get_current_user, hash_password, verify_password
+from app.database import Base, SessionLocal, engine, get_db, test_connection
 from app.models import User
 
 from app.routers import (
@@ -54,6 +54,9 @@ app = FastAPI(
     version="2.0.0",
 )
 
+# Alias for running with `uvicorn app.main:main`
+main = app
+
 
 # =========================================================
 # CORS
@@ -65,7 +68,14 @@ app.add_middleware(
         "https://aquafarmcontrol.vercel.app",
         "http://localhost:5500",
         "http://127.0.0.1:5500",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
     ],
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -88,6 +98,18 @@ app.include_router(reports_settings.router)
 
 # AI prediction routes
 app.include_router(ml_api.router)
+
+
+@app.post("/api/predict-all")
+@app.post("/api/predict-all/")
+@app.post("/api/predict")
+@app.post("/api/predict/")
+def predict_all_alias(
+    payload: ml_api.PredictAllRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    return ml_api.predict_all(payload=payload, db=db, user=user)
 
 
 # =========================================================
@@ -265,6 +287,17 @@ def serve_page(page_name: str):
         )
 
     return FileResponse(target)
+
+
+@app.get("/{page_name}.html")
+def serve_page_direct(page_name: str):
+    target = PAGES / f"{page_name}.html"
+    if target.exists() and target.is_file():
+        return FileResponse(target)
+    root_target = FRONTEND / f"{page_name}.html"
+    if root_target.exists() and root_target.is_file():
+        return FileResponse(root_target)
+    return RedirectResponse(url="/")
 
 
 # =========================================================

@@ -50,8 +50,9 @@
         console.error("Could not load daily observations:", error);
 
         mountAppShell("ai-prediction", `
-      <div class="alert alert-danger">
-        Could not load daily observations.
+      <div class="alert alert-danger shadow-sm rounded-3 p-4 my-4">
+        <h5 class="fw-bold mb-2"><i class="fa-solid fa-triangle-exclamation me-2"></i>${error?.status === 0 || error?.message === "Server is not reachable" ? "Server is not reachable" : "Could not load daily observations."}</h5>
+        <p class="mb-0 text-muted small">${error?.status === 0 || error?.message === "Server is not reachable" ? "Could not connect to the backend server. Please verify that the backend is running." : (error?.message || "")}</p>
       </div>
     `);
 
@@ -1153,11 +1154,15 @@
               "AI prediction error:",
               error
             );
-
-
-            errorBox.textContent =
-              error?.message ||
-              "Prediction failed. Please check the backend.";
+            if (error?.status === 0 || error?.message === "Server is not reachable") {
+              errorBox.textContent = "Server is not reachable. Please start or verify the backend server.";
+            } else if (error?.status === 404 || error?.message === "Not Found") {
+              errorBox.textContent = "Prediction endpoint not found. Please ensure the backend server is running the latest code.";
+            } else {
+              errorBox.textContent =
+                error?.message ||
+                "Prediction failed. Please check the backend.";
+            }
 
             errorBox.classList.remove("d-none");
 
