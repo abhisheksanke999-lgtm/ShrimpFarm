@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import joblib
-import pandas as pd
+
 
 # =====================================
 # Paths
@@ -32,30 +32,19 @@ def predict_mortality(
     water_quality = water_encoder.transform([water_quality])[0]
     disease_risk = disease_encoder.transform([disease_risk])[0]
 
-    row = pd.DataFrame(
-        [[
-            doc,
-            temperature,
-            ph,
-            dissolved_oxygen,
-            salinity,
-            water_quality,
-            disease_risk,
-            recommended_feed,
-            previous_mortality,
-        ]],
-        columns=[
-            "doc",
-            "temperature",
-            "ph",
-            "dissolved_oxygen",
-            "salinity",
-            "water_quality",
-            "disease_risk",
-            "recommended_feed",
-            "previous_mortality",
-        ],
-    )
+    # Build row as a list of lists (compatible with scikit‑learn)
+    row = [[
+        doc,
+        temperature,
+        ph,
+        dissolved_oxygen,
+        salinity,
+        water_quality,
+        disease_risk,
+        recommended_feed,
+        previous_mortality,
+    ]]
+
 
     prediction = model.predict(row)[0]
 

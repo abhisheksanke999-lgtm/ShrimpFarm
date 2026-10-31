@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import joblib
-import pandas as pd
+
 
 HARVEST_DIR = Path(__file__).resolve().parent
 
