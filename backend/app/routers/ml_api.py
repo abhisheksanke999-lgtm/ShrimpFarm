@@ -145,31 +145,8 @@ def predict_all(
         else 0
     )
 
-    # Normalize categorical inputs
-    wq_input = (payload.water_quality or "").strip().title()
-    if wq_input in ("Good", "Moderate", "Poor"):
-        water_quality = wq_input
-    elif "good" in wq_input.lower():
-        water_quality = "Good"
-    elif "poor" in wq_input.lower():
-        water_quality = "Poor"
-    else:
-        water_quality = "Moderate"
-
-    dr_input = (payload.disease_risk or "").strip().title()
-    if dr_input in ("Healthy", "Moderate", "High"):
-        disease_risk = dr_input
-    elif "low" in dr_input.lower() or "health" in dr_input.lower():
-        disease_risk = "Healthy"
-    elif "mod" in dr_input.lower():
-        disease_risk = "Moderate"
-    elif "high" in dr_input.lower():
-        disease_risk = "High"
-    else:
-        disease_risk = "Healthy"
-
     # =====================================================
-    # 3. GET DISEASE CONFIDENCE FROM DAILY PREDICTION
+    # 3. LATEST DISEASE PREDICTION FOR THIS POND
     # =====================================================
 
     disease_record = (
@@ -190,6 +167,37 @@ def predict_all(
         if disease_record and disease_record.disease_confidence is not None
         else 0
     )
+
+    # Normalize categorical inputs; fall back to this pond's latest record
+    wq_input = (
+        payload.water_quality
+        or (disease_record.water_quality if disease_record else "")
+        or ""
+    ).strip().title()
+    if wq_input in ("Good", "Moderate", "Poor"):
+        water_quality = wq_input
+    elif "good" in wq_input.lower():
+        water_quality = "Good"
+    elif "poor" in wq_input.lower():
+        water_quality = "Poor"
+    else:
+        water_quality = "Moderate"
+
+    dr_input = (
+        payload.disease_risk
+        or (disease_record.disease_risk if disease_record else "")
+        or ""
+    ).strip().title()
+    if dr_input in ("Healthy", "Moderate", "High"):
+        disease_risk = dr_input
+    elif "low" in dr_input.lower() or "health" in dr_input.lower():
+        disease_risk = "Healthy"
+    elif "mod" in dr_input.lower():
+        disease_risk = "Moderate"
+    elif "high" in dr_input.lower():
+        disease_risk = "High"
+    else:
+        disease_risk = "Healthy"
 
     # =====================================================
     # 4. FEED PREDICTION
@@ -369,6 +377,12 @@ def predict_all(
 
         "disease_confidence":
             disease_confidence,
+
+        "water_quality":
+            water_quality,
+
+        "disease_risk":
+            disease_risk,
 
         "feed": {
 

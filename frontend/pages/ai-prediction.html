@@ -127,8 +127,17 @@
       }
 
 
-      const latestPrediction =
+      // Only reuse the dashboard prediction if it is for the same pond;
+      // otherwise the backend looks up that pond's own latest record.
+      const dashboardPrediction =
         dashboardData?.latest_prediction || null;
+
+      const latestPrediction =
+        dashboardPrediction &&
+        String(dashboardPrediction.pond_name || "").trim().toLowerCase() ===
+          String(latest.pond_name || "").trim().toLowerCase()
+          ? dashboardPrediction
+          : null;
 
 
       // =====================================================
@@ -157,10 +166,10 @@
         Number(latest.mortality_count || 0);
 
       const waterQuality =
-        latestPrediction?.water_quality || "Moderate";
+        latestPrediction?.water_quality || "";
 
       const diseaseRisk =
-        latestPrediction?.disease_risk || "Healthy";
+        latestPrediction?.disease_risk || "";
 
 
       // =====================================================
@@ -339,6 +348,7 @@
             id="water_quality"
             class="form-control"
             value="${escapeHtml(waterQuality)}"
+            placeholder="From pond's latest record"
             readonly
           >
 
@@ -357,6 +367,7 @@
             id="disease_risk"
             class="form-control"
             value="${escapeHtml(diseaseRisk)}"
+            placeholder="From pond's latest record"
             readonly
           >
 
@@ -1003,6 +1014,38 @@
             return;
           }
 
+          const requiredFields = [
+            ["doc", "DOC (Days of Culture)"],
+            ["avg_weight", "Average Weight"],
+            ["biomass", "Biomass"],
+            ["survival_rate", "Survival Rate"],
+            ["market_price", "Market Price"],
+          ];
+
+          const missing = requiredFields
+            .filter(([key]) => !(payload[key] > 0))
+            .map(([, label]) => label);
+
+          if (missing.length) {
+
+            errorBox.textContent =
+              `Please enter a value greater than 0 for: ${missing.join(", ")}.`;
+
+            errorBox.classList.remove("d-none");
+
+            return;
+          }
+
+          if (payload.survival_rate > 100) {
+
+            errorBox.textContent =
+              "Survival Rate cannot be more than 100%.";
+
+            errorBox.classList.remove("d-none");
+
+            return;
+          }
+
 
           // ---------------------------------------------------
           // LOADING
@@ -1031,10 +1074,15 @@
               );
 
 
-            console.log(
-              "Prediction Result:",
-              result
-            );
+            if (result.water_quality) {
+              document.getElementById("water_quality").value =
+                result.water_quality;
+            }
+
+            if (result.disease_risk) {
+              document.getElementById("disease_risk").value =
+                result.disease_risk;
+            }
 
 
             // -------------------------------------------------
@@ -1172,7 +1220,7 @@
 
             button.innerHTML = `
           <i class="fa-solid fa-wand-magic-sparkles me-2"></i>
-          Generate AI Predictions
+          Generate Predictions
         `;
 
           }

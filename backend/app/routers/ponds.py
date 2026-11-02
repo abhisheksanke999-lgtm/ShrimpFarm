@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user
@@ -72,6 +73,14 @@ def create_pond(payload: PondCreate, db: Session = Depends(get_db), user: User =
     name = payload.name.strip()
     if not name or payload.area_sqm <= 0 or payload.depth_m <= 0:
         raise HTTPException(status_code=400, detail="Please fill in all required pond details with valid measurements.")
+
+    duplicate = (
+        db.query(Pond)
+        .filter(Pond.user_id == user.id, func.lower(func.trim(Pond.name)) == name.lower())
+        .first()
+    )
+    if duplicate:
+        raise HTTPException(status_code=400, detail="A pond with this name already exists.")
 
     pond = Pond(
         user_id=user.id,

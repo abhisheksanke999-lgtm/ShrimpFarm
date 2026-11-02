@@ -105,6 +105,16 @@ function renderSidebar(active) {
 }
 
 
+function showPageError(activePage, err) {
+  const unreachable = err?.status === 0 || err?.message === "Server is not reachable";
+  mountAppShell(activePage, `
+    <div class="alert alert-danger shadow-sm rounded-3 p-4 my-4">
+      <h5 class="fw-bold mb-2"><i class="fa-solid fa-triangle-exclamation me-2"></i>${unreachable ? "Server is not reachable" : "Could not load this page"}</h5>
+      <p class="mb-0 text-muted small">${unreachable ? "Could not connect to the backend server. Please verify that it is running and try again." : escapeHtml(err?.message || "")}</p>
+    </div>
+  `);
+}
+
 function mountAppShell(activePage, mainHtml) {
 
   const root = document.getElementById("app");

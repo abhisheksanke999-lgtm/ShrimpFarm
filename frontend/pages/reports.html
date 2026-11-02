@@ -17,7 +17,13 @@
     (async () => {
       const user = await requireAuth();
       if (!user) return;
-      const r = await API.get("/api/reports");
+      let r;
+      try {
+        r = await API.get("/api/reports");
+      } catch (err) {
+        showPageError("reports", err);
+        return;
+      }
       const profitClass = r.net_profit >= 0 ? "text-success" : "text-danger";
 
       mountAppShell("reports", `

@@ -114,7 +114,7 @@
         }
       });
     }
-    loadPage();
+    loadPage().catch((err) => showPageError("expense", err));
   </script>
 </body>
 

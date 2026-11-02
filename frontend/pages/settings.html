@@ -55,7 +55,7 @@
         }
       });
     }
-    loadPage();
+    loadPage().catch((err) => showPageError("settings", err));
   </script>
 </body>
 </html>

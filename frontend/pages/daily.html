@@ -16,7 +16,30 @@
   <script src="../js/api.js"></script>
   <script src="../js/layout.js"></script>
   <script>
-    async function loadPage(flash) {
+    function showPrediction(prediction) {
+      if (!prediction) return;
+      document.getElementById("predictionBox").classList.remove("d-none");
+
+      const risk = prediction.disease_risk;
+      const riskElement = document.getElementById("riskLevel");
+      if (risk === "Healthy") {
+        riskElement.textContent = "🟢 Healthy";
+        riskElement.className = "text-success fw-bold";
+      } else if (risk === "Moderate") {
+        riskElement.textContent = "🟡 Moderate";
+        riskElement.className = "text-warning fw-bold";
+      } else {
+        riskElement.textContent = "🔴 High Risk";
+        riskElement.className = "text-danger fw-bold";
+      }
+
+      document.getElementById("confidence").textContent = prediction.confidence ?? "";
+      document.getElementById("recommendations").innerHTML = (prediction.recommendations || [])
+        .map((r) => `<li>${escapeHtml(r)}</li>`)
+        .join("");
+    }
+
+    async function loadPage(flash, prediction) {
       const user = await requireAuth();
       if (!user) return;
       const [ponds, logs] = await Promise.all([API.get("/api/ponds/names"), API.get("/api/daily")]);
@@ -139,60 +162,25 @@
         </div>
       `);
 
+      showPrediction(prediction);
+
       document.getElementById("dailyForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
         try {
-  const res = await API.post("/api/daily", {
-    pond_name: fd.get("pond_name"),
-    log_date: fd.get("log_date"),
-    temperature: Number(fd.get("temperature") || 0),
-    ph: Number(fd.get("ph") || 0),
-    salinity: Number(fd.get("salinity") || 0),
-    dissolved_oxygen: Number(fd.get("dissolved_oxygen") || 0),
-    water_color: fd.get("water_color"),
-    mortality_count: Number(fd.get("mortality_count") || 0),
-    notes: fd.get("notes") || "",
-});
-
-// Success message
-document.getElementById("flash").className =
-    "alert alert-success py-2 small rounded-3 mb-3";
-document.getElementById("flash").innerHTML = res.message;
-document.getElementById("flash").classList.remove("d-none");
-
-// Show prediction card
-document.getElementById("predictionBox").classList.remove("d-none");
-
-// Risk
-const risk = res.prediction.disease_risk;
-const riskElement = document.getElementById("riskLevel");
-
-if (risk === "Healthy") {
-    riskElement.innerHTML = "🟢 Healthy";
-    riskElement.className = "text-success fw-bold";
-}
-else if (risk === "Moderate") {
-    riskElement.innerHTML = "🟡 Moderate";
-    riskElement.className = "text-warning fw-bold";
-}
-else {
-    riskElement.innerHTML = "🔴 High Risk";
-    riskElement.className = "text-danger fw-bold";
-}
-
-// Confidence
-document.getElementById("confidence").innerHTML =
-    res.prediction.confidence;
-
-// Recommendations
-document.getElementById("recommendations").innerHTML =
-    res.prediction.recommendations
-        .map(r => `<li>${r}</li>`)
-        .join("");
-
-// Reset form
-e.target.reset();
+          const res = await API.post("/api/daily", {
+            pond_name: fd.get("pond_name"),
+            log_date: fd.get("log_date"),
+            temperature: Number(fd.get("temperature") || 0),
+            ph: Number(fd.get("ph") || 0),
+            salinity: Number(fd.get("salinity") || 0),
+            dissolved_oxygen: Number(fd.get("dissolved_oxygen") || 0),
+            water_color: fd.get("water_color"),
+            mortality_count: Number(fd.get("mortality_count") || 0),
+            notes: fd.get("notes") || "",
+          });
+          // Reload so the new log appears in the table, then show the prediction
+          await loadPage({ type: "success", msg: res.message }, res.prediction);
         } catch (err) {
           await loadPage({ type: "danger", msg: err.message });
         }
@@ -212,7 +200,7 @@ e.target.reset();
         }
       });
     }
-    loadPage();
+    loadPage().catch((err) => showPageError("daily", err));
   </script>
 </body>
 

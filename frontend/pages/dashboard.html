@@ -246,7 +246,11 @@
 
             ? "🟡 Moderate"
 
-            : "🔴 High Risk"
+            : prediction.disease_risk === "High"
+
+              ? "🔴 High Risk"
+
+              : "N/A"
         }
 
                   </h6>

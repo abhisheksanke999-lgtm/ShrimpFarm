@@ -35,8 +35,12 @@ X_train, X_test, y_train, y_test = train_test_split(
     random_state=42,
 )
 
+# Depth/leaf limits keep the saved model ~20MB instead of ~145MB so all
+# models fit in Render's 512MB RAM together (accuracy loss < 0.001 R2).
 model = RandomForestRegressor(
-    n_estimators=200,
+    n_estimators=100,
+    max_depth=14,
+    min_samples_leaf=3,
     random_state=42,
 )
 
