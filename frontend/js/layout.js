@@ -9,7 +9,7 @@ function renderSidebar(active) {
     // ==============================
     // AI PREDICTION
     // ==============================
-    { key: "ai-prediction", href: "ai-prediction.html", icon: "fa-brain", label: "AI Prediction", color: "text-primary" },
+    { key: "ai-prediction", href: "ai-prediction.html", icon: "fa-brain", label: "Predict", color: "text-primary" },
 
     { key: "feed", href: "feed.html", icon: "fa-wheat-awn", label: "Feed Records", color: "text-warning" },
     { key: "expense", href: "expense.html", icon: "fa-wallet", label: "Expense Records", color: "text-danger" },
