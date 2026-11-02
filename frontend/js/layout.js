@@ -7,7 +7,7 @@ function renderSidebar(active) {
     { key: "daily", href: "daily.html", icon: "fa-clipboard-list", label: "Daily Observation", color: "text-success" },
 
     // ==============================
-    // AI PREDICTION
+    // PREDICTION
     // ==============================
     { key: "ai-prediction", href: "ai-prediction.html", icon: "fa-brain", label: "Predict", color: "text-primary" },
 
