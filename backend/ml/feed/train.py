@@ -83,3 +83,4 @@ joblib.dump(water_encoder, FEED_DIR / "water_encoder.pkl")
 joblib.dump(disease_encoder, FEED_DIR / "disease_encoder.pkl")
 
 print("\nFeed model saved successfully!")
+print("Now run `python -m ml.export_compact` from backend/ to update model.npz used by the API.")

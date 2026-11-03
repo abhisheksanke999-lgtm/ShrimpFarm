@@ -40,3 +40,4 @@ print("MAE :", mean_absolute_error(y_test, pred))
 joblib.dump(model, PROFIT_DIR / "model.pkl")
 
 print("Profit model saved successfully!")
+print("Now run `python -m ml.export_compact` from backend/ to update model.npz used by the API.")

@@ -2,13 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ml._lazy import load_pkl
+from ml._forest import load_forest
 
 PROFIT_DIR = Path(__file__).resolve().parent
-
-
-def _model():
-    return load_pkl(PROFIT_DIR, "model.pkl")
 
 
 def predict_profit(
@@ -22,9 +18,9 @@ def predict_profit(
     other_expenses,
     survival_rate,
 ):
-    model = _model()
+    model = load_forest(PROFIT_DIR)
 
-    row = [[
+    row = [
         harvest_weight,
         market_price,
         feed_cost,
@@ -34,9 +30,9 @@ def predict_profit(
         labour_cost,
         other_expenses,
         survival_rate,
-    ]]
+    ]
 
-    prediction = model.predict(row)[0]
+    prediction = model.predict_value(row)
 
     return {
         "expected_profit": round(float(prediction), 2),

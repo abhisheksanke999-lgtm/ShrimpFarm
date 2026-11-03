@@ -97,3 +97,4 @@ joblib.dump(disease_encoder, DISEASE_DIR / "encoder.pkl")
 
 print("\nModel Saved Successfully!")
 print(f"Saved under: {DISEASE_DIR}")
+print("Now run `python -m ml.export_compact` from backend/ to update model.npz used by the API.")

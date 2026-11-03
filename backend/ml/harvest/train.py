@@ -57,3 +57,4 @@ joblib.dump(disease_encoder, HARVEST_DIR / "disease_encoder.pkl")
 joblib.dump(mortality_encoder, HARVEST_DIR / "mortality_encoder.pkl")
 
 print("\nHarvest model saved successfully!")
+print("Now run `python -m ml.export_compact` from backend/ to update model.npz used by the API.")

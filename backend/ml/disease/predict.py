@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ml._lazy import load_pkl
+from ml._forest import load_forest
 
 DISEASE_DIR = Path(__file__).resolve().parent
 
@@ -34,20 +34,11 @@ DEFAULT_FEATURES = [
 
 
 def _model():
-    return load_pkl(DISEASE_DIR, "model.pkl")
-
-
-def _water_encoder():
-    return load_pkl(DISEASE_DIR, "water_encoder.pkl")
-
-
-def _disease_encoder():
-    return load_pkl(DISEASE_DIR, "encoder.pkl")
+    return load_forest(DISEASE_DIR)
 
 
 def _known_water_colors() -> list:
-    enc = _water_encoder()
-    return list(getattr(enc, "classes_", []))
+    return list(_model().encoders["water_color"])
 
 
 def _normalize_water_color(water_color: str) -> str:
@@ -84,11 +75,9 @@ def predict_disease(
     pond_age: int = 60,
 ):
     model = _model()
-    water_encoder = _water_encoder()
-    disease_encoder = _disease_encoder()
 
     color = _normalize_water_color(str(water_color))
-    water_color_encoded = int(water_encoder.transform([color])[0])
+    water_color_encoded = model.encode("water_color", color)
 
     values = {
         "temperature": float(temperature or 0),
@@ -101,12 +90,10 @@ def predict_disease(
         "pond_age": float(int(pond_age if pond_age is not None else 60)),
     }
 
-    feature_names = list(getattr(model, "feature_names_in_", DEFAULT_FEATURES))
-    row = [[values[name] for name in feature_names]]
+    feature_names = model.feature_names or DEFAULT_FEATURES
+    row = [values[name] for name in feature_names]
 
-    prediction = model.predict(row)[0]
-    probability = float(model.predict_proba(row).max())
-    disease = disease_encoder.inverse_transform([prediction])[0]
+    disease, probability = model.predict_class(row)
 
     if disease == "Healthy":
         recommendations = [

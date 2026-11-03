@@ -2,25 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ml._lazy import load_pkl
+from ml._forest import load_forest
 
 MORTALITY_DIR = Path(__file__).resolve().parent
-
-
-def _model():
-    return load_pkl(MORTALITY_DIR, "model.pkl")
-
-
-def _water_encoder():
-    return load_pkl(MORTALITY_DIR, "water_encoder.pkl")
-
-
-def _disease_encoder():
-    return load_pkl(MORTALITY_DIR, "disease_encoder.pkl")
-
-
-def _mortality_encoder():
-    return load_pkl(MORTALITY_DIR, "encoder.pkl")
 
 
 def predict_mortality(
@@ -34,15 +18,12 @@ def predict_mortality(
     recommended_feed,
     previous_mortality,
 ):
-    model = _model()
-    water_encoder = _water_encoder()
-    disease_encoder = _disease_encoder()
-    mortality_encoder = _mortality_encoder()
+    model = load_forest(MORTALITY_DIR)
 
-    wq = water_encoder.transform([water_quality])[0]
-    dr = disease_encoder.transform([disease_risk])[0]
+    wq = model.encode("water_quality", water_quality)
+    dr = model.encode("disease_risk", disease_risk)
 
-    row = [[
+    row = [
         doc,
         temperature,
         ph,
@@ -52,10 +33,9 @@ def predict_mortality(
         dr,
         recommended_feed,
         previous_mortality,
-    ]]
+    ]
 
-    prediction = model.predict(row)[0]
-    risk = mortality_encoder.inverse_transform([prediction])[0]
+    risk, _ = model.predict_class(row)
 
     if risk == "Low":
         recommendations = [

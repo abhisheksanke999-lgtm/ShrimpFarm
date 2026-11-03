@@ -2,21 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ml._lazy import load_pkl
+from ml._forest import load_forest
 
 FEED_DIR = Path(__file__).resolve().parent
-
-
-def _model():
-    return load_pkl(FEED_DIR, "model.pkl")
-
-
-def _water_encoder():
-    return load_pkl(FEED_DIR, "water_encoder.pkl")
-
-
-def _disease_encoder():
-    return load_pkl(FEED_DIR, "disease_encoder.pkl")
 
 
 def predict_feed(
@@ -29,14 +17,12 @@ def predict_feed(
     disease_risk,
     yesterday_feed,
 ):
-    water_encoder = _water_encoder()
-    disease_encoder = _disease_encoder()
-    model = _model()
+    model = load_forest(FEED_DIR)
 
-    wq = water_encoder.transform([water_quality])[0]
-    dr = disease_encoder.transform([disease_risk])[0]
+    wq = model.encode("water_quality", water_quality)
+    dr = model.encode("disease_risk", disease_risk)
 
-    row = [[
+    row = [
         doc,
         avg_weight,
         biomass,
@@ -45,9 +31,9 @@ def predict_feed(
         wq,
         dr,
         yesterday_feed,
-    ]]
+    ]
 
-    prediction = model.predict(row)[0]
+    prediction = model.predict_value(row)
 
     if prediction < yesterday_feed:
         message = "Reduce feeding today."

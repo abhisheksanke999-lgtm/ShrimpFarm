@@ -1,7 +1,13 @@
 """Run from backend folder: uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 Or use backend\\run.bat. Running from backend/app with main:app also works (path fix below)."""
+import os
 import sys
 from pathlib import Path
+
+# One BLAS/OpenMP thread: each extra thread reserves its own buffers,
+# which adds up on Render's many-core hosts with a 512MB limit.
+for _var in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
+    os.environ.setdefault(_var, "1")
 
 _BACKEND_ROOT = Path(__file__).resolve().parent.parent
 if str(_BACKEND_ROOT) not in sys.path:

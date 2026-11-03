@@ -84,3 +84,4 @@ joblib.dump(disease_encoder, MORTALITY_DIR / "disease_encoder.pkl")
 joblib.dump(mortality_encoder, MORTALITY_DIR / "encoder.pkl")
 
 print("\nMortality model saved successfully!")
+print("Now run `python -m ml.export_compact` from backend/ to update model.npz used by the API.")
